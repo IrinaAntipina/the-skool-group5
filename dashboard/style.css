@@ -1,13 +1,15 @@
+
+
 .container-card {
   display: flex;
-  flex-direction: column; /* вертикальное размещение: сначала заголовок, потом контент */
+  flex-direction: column;
   padding: 20px;
-  gap: 20px; /* отступ между заголовком и контентом */
+  gap: 20px;
+  width: 100vw;
+  box-sizing: border-box;
 }
 
-/* Заголовок */
 .title-card {
-  background-color: #e0e0e0;
   padding: 15px;
   border-radius: 8px;
   font-size: 1.5rem;
@@ -15,34 +17,54 @@
   text-align: center;
 }
 
-/* Контейнер для трёх секций */
 .main-container {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: stretch; 
+  gap: 20px;
+  flex: 1; 
+  overflow: hidden;
+}
+
+.left-column {
+  width: 20%;
+  display: flex;
+  flex-direction: column;
   gap: 20px;
 }
 
-/* Левая часть */
-.filter-section {
-  flex: 1;
+.middle-column {
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.right-column {
+  width: 40%; 
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.filter-section,
+.kpi-section,
+.middle-section,
+.table-section,
+.pie-section,
+.chart-section {
   background-color: #f5f5f5;
   padding: 15px;
   border-radius: 8px;
+  box-sizing: border-box;
 }
 
-/* Центральная часть */
+
 .middle-section {
-  flex: 2;
   background-color: #ffffff;
-  padding: 15px;
-  border-radius: 8px;
 }
 
-/* Правая часть */
-.right-section {
-  flex: 1;
-  background-color: #f0f0f0;
-  padding: 15px;
-  border-radius: 8px;
+.table-section {
+  background-color: #fafafa;
 }
+
