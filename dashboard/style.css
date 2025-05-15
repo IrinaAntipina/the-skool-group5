@@ -1,0 +1,48 @@
+.container-card {
+  display: flex;
+  flex-direction: column; /* вертикальное размещение: сначала заголовок, потом контент */
+  padding: 20px;
+  gap: 20px; /* отступ между заголовком и контентом */
+}
+
+/* Заголовок */
+.title-card {
+  background-color: #e0e0e0;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Контейнер для трёх секций */
+.main-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+/* Левая часть */
+.filter-section {
+  flex: 1;
+  background-color: #f5f5f5;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+/* Центральная часть */
+.middle-section {
+  flex: 2;
+  background-color: #ffffff;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+/* Правая часть */
+.right-section {
+  flex: 1;
+  background-color: #f0f0f0;
+  padding: 15px;
+  border-radius: 8px;
+}
