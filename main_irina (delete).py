@@ -13,14 +13,14 @@ from frontend.del_irina import (
     create_additional_chart
 )
 
-df = pd.read_excel(DATA_DIRECTORY / "resultat-2024-for-kurser-inom-yh.xlsx", sheet_name="Lista ansökningar")
+#df = pd.read_excel(DATA_DIRECTORY / "resultat-2024-for-kurser-inom-yh.xlsx", sheet_name="Lista ansökningar")
 
 selected_educational_area = ""
 selected_municipality = ""
 selected_school = ""
 selected_education = ""
 
-filtered_df = df.copy()
+#filtered_df = df.copy()
 
 def get_educational_areas():
     return [""] + sorted(df['Utbildningsområde'].dropna().unique().tolist())
