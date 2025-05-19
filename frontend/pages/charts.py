@@ -5,18 +5,11 @@ import duckdb
 import plotly.express as px
 import plotly.graph_objects as go
 #from utils.constants import DATA_DIRECTORY
-#from ...assets.color_codes import SEA_GREEN, SALMON_RED 
-from backend.data_processing import filtered_df, df_bar_chart, swedish_coordinates
+from assets.color_codes import SEA_GREEN, SALMON_RED 
+from backend.data_processing import filtered_df, df_bar_chart, df_geo, swedish_coordinates, geojson 
 
 
 # Irina---------------------------------------------
-
-# try:
-#     from assets.swedish_coordinates import swedish_coordinates
-#     print("Successfully imported swedish_coordinates")
-# except ImportError:
-#     print("Warning: Could not import swedish_coordinates, using empty dict")
-#     swedish_coordinates = {}
 
 
 def prepare_pie_data(filtered_df):
@@ -188,10 +181,10 @@ def create_bar(df_bar_chart):
         orientation="h",
         custom_data=["Totala ansökningar", "Anordnare"],
         # title="Bland de 10 anordnarna med flest ansökningar är vissa betydligt bättre på att få sina ansökningar beviljade",
-        width=900,
-        height=500,
+       # width=900,
+       # height=500,
         color="Beslut",
-        color_discrete_map={"Beviljad": "#2E8B57", "Avslag": "#FA8072"},
+        color_discrete_map={"Beviljad": SEA_GREEN, "Avslag": SALMON_RED},
     )
 
     # reverse the bars, remove unneccesary things and fix font
@@ -221,4 +214,42 @@ def create_bar(df_bar_chart):
     return figure
 
 bar_chart = create_bar(df_bar_chart)
+
+
+# Jonathan ------------------------------------------------
+
+def geo_chart(df_geo):
+    fig = px.choropleth(
+    df_geo,
+    geojson=geojson,
+    featureidkey="properties.name",
+    locations="geo_län",
+    color="beviljade_utbildningar",
+    color_continuous_scale="Blues",
+    range_color=(0, df_geo["beviljade_utbildningar"].max()),
+    labels={"beviljade_utbildningar": "Beviljade utbildningar"},
+    title="Beviljade utbildningar per län i Sverige"
+    )
+
+    fig.update_geos(
+        fitbounds="locations",
+        visible=False,
+        projection_type="mercator"
+    )
+
+    fig.update_layout(
+        margin={"r": 0, "t": 30, "l": 0, "b": 0},
+        geo=dict(bgcolor='rgba(0,0,0,0)'),
+        coloraxis_colorbar=dict(
+            x=-0.05,
+            title="Beviljade utbildningar"
+        )
+    )
+
+#    fig.show()
+    return fig
+
+
+
+
 
