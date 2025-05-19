@@ -3,7 +3,8 @@ from taipy.gui import Gui
 from utils.constants import DATA_DIRECTORY
 import pandas as pd
 import os 
-from backend.data_processing import filtered_df, df_bar_chart 
+from backend.data_processing import filtered_df, df_bar_chart, df_geo 
+
 
 from .charts import (
     prepare_pie_data, 
@@ -12,17 +13,15 @@ from .charts import (
     create_heat_map,
     get_summary_stats,
     create_additional_chart,
-    create_bar
+    create_bar, 
+    geo_chart
 )
-
-#df = pd.read_excel(DATA_DIRECTORY / "resultat-2024-for-kurser-inom-yh.xlsx", sheet_name="Lista ansökningar")
 
 selected_educational_area = ""
 selected_municipality = ""
 selected_school = ""
 selected_education = ""
 
-#filtered_df = df.copy()
 
 def get_educational_areas():
     return [""] + sorted(filtered_df['Utbildningsområde'].dropna().unique().tolist())
@@ -83,7 +82,7 @@ def reset_filters(state):
     state.municipalities = get_municipalities()
     state.schools = get_schools()
     state.educations = get_educations()
-    state.filtered_df = state.df.copy()
+    state.filtered_df = state.filtered_df.copy()
 
 
 
@@ -103,6 +102,7 @@ def get_kpi_text(filtered_df):
 pie_data = prepare_pie_data(filtered_df)
 map_data = prepare_map_data(filtered_df)
 pie_figure = create_pie_chart(pie_data)
+geo_figure = geo_chart(df_geo)
 heat_map_figure = create_heat_map(map_data, show_map=True)
 bar_chart = create_bar(df_bar_chart)
 schools_chart = create_additional_chart(filtered_df)
@@ -177,9 +177,9 @@ with tgb.Page() as page:
                         tgb.text("Översikt av ansökningsresultat", class_name="description-text")
                         with tgb.part(class_name="map-card"):
                             tgb.chart(figure="{heat_map_figure}")
-                            
-                with tgb.part(class_name="table-section"):
-                    tgb.table(data="{filtered_df}")
+                        with tgb.part(class_name="map-card"):
+                            tgb.chart(figure="{geo_figure}")
+
             
             with tgb.part(class_name="right-column"):
                 with tgb.part(class_name="pie-section"):
