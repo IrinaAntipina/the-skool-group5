@@ -5,7 +5,6 @@ import pandas as pd
 import os
 from backend.data_processing import (
     filtered_df,
-    df_bar_chart,
     df_geo,
     kpi,
     get_educational_areas,
@@ -23,7 +22,6 @@ from .charts import (
     create_heat_map,
     get_summary_stats,
     create_additional_chart,
-    create_bar,
     geo_chart,
 )
 
@@ -97,18 +95,17 @@ map_data = prepare_map_data(filtered_df)
 pie_figure = create_pie_chart(pie_data)
 geo_figure = geo_chart(df_geo)
 heat_map_figure = create_heat_map(map_data, show_map=True)
-bar_chart = create_bar(df_bar_chart)
 schools_chart = create_additional_chart(filtered_df)
 
 with tgb.Page() as page:
     with tgb.part(class_name="container-card"):
         tgb.navbar()
         with tgb.part(class_name="title-card"):
-            tgb.text("# MYH dashboard 2024", mode="md")
-            tgb.text(
-                "Detta är en dashboard för att visa statistik och information om ansökningsomgång 2024",
-                mode="md",
-            )
+            tgb.text("# MYH dashboard", mode="md")
+            # tgb.text(
+            #     "Detta är en dashboard för att visa statistik och information om ansökningsomgång 2024",
+            #     mode="md",
+            # )
 
         with tgb.part(class_name="main-container"):
             with tgb.part(class_name="left-column"):
@@ -188,10 +185,5 @@ with tgb.Page() as page:
                     with tgb.part(class_name="pie-grid"):
                         with tgb.part(class_name="card"):
                             tgb.chart(figure="{pie_figure}")
-
-                with tgb.part(class_name="chart-section"):
-                    with tgb.part(class_name="chart-grid"):
-                        with tgb.part(class_name="card"):
-                            tgb.chart(figure="{bar_chart}")
 
 dashboard_page = page

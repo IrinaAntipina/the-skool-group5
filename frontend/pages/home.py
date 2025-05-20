@@ -5,10 +5,10 @@ with tgb.Page() as home_page:
         tgb.navbar()
 
         with tgb.part():
-            tgb.text("# Välkommen till YH dashboard 2024", mode="md")
+            tgb.text("# Välkommen till YH dashboard", mode="md")
             tgb.text(
                 """
-            YH Dashboard 2024 är ett interaktivt verktyg som visualiserar
-            statistik och information kring ansökningsomgången för Yrkeshögskoleutbildningar (YH) under året 2024. Syftet med dashboarden är att ge en tydlig överblick över antalet ansökta utbildningar per kommun och utbildningsområde, med möjlighet att filtrera och analysera data utifrån användarens intresse.
+            Denna dashboard är ett interaktivt verktyg som visualiserar statistik och information kring de senaste ansökningsomgångarna för yrkeshögskoleutbildningar (YH).
+            Syftet med dashboarden är att visualisera relevant information med möjlighet att filtrera och analysera data utifrån användarens intresse.
             """
             )
