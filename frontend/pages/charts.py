@@ -5,7 +5,7 @@ import duckdb
 import plotly.express as px
 import plotly.graph_objects as go
 #from utils.constants import DATA_DIRECTORY
-from assets.color_codes import SEA_GREEN, SALMON_RED 
+from assets.color_codes import SEA_GREEN, SALMON_RED, SNOW
 from backend.data_processing import filtered_df, df_bar_chart, df_geo, swedish_coordinates, geojson 
 
 
@@ -145,7 +145,6 @@ def create_additional_chart(fitered_df, chart_type="bar"):
 
 # Fredrik--------------------------------------------------
 
-#df = pd.read_excel(DATA_DIRECTORY / "resultat-2024-for-kurser-inom-yh.xlsx", sheet_name="Lista ansökningar")
 # Function for creating a figure
 def create_bar(df_bar_chart):
     # query to get top 10 schools
@@ -180,9 +179,6 @@ def create_bar(df_bar_chart):
         y="Anordnare",
         orientation="h",
         custom_data=["Totala ansökningar", "Anordnare"],
-        # title="Bland de 10 anordnarna med flest ansökningar är vissa betydligt bättre på att få sina ansökningar beviljade",
-       # width=900,
-       # height=500,
         color="Beslut",
         color_discrete_map={"Beviljad": SEA_GREEN, "Avslag": SALMON_RED},
     )
@@ -190,21 +186,40 @@ def create_bar(df_bar_chart):
     # reverse the bars, remove unneccesary things and fix font
     figure.update_layout(
         title=dict(
-            text="Bland de 10 yrkeshögskolorna med flest ansökta kurser år 2024 är vissa<br>betydligt bättre på att få sina ansökningar beviljade än andra",
-            font=dict(size=22, family="Arial", color="White"),
+            text="Bland de 10 anordnarna med flest kursansökningar år 2024<br>är vissa betydligt bättre på att få sina beviljade",
+            font=dict(size=20, family="Arial", color=SNOW),
+            x=0.5
         ),
         margin=dict(t=100),  # place between title and bars
         xaxis=dict(
-            tickfont=dict(family="Arial", size=14, color="snow")
+            tickfont=dict(family="Arial", color=SNOW)
         ),
         yaxis=dict(
             autorange="reversed",
-            tickfont=dict(family="Arial", size=14, color="snow")
+            tickfont=dict(family="Arial", color=SNOW)
         ),
         legend_title_text=None,
         xaxis_title=None,
         yaxis_title=None
     )
+
+    figure.add_annotation(
+    x=18,
+    y="Nackademin AB",
+    xref="x",
+    yref="y",
+    ax=45,
+    ay=4,
+    axref="x",
+    ayref="y",
+    showarrow=True,
+    arrowhead=2,
+    arrowsize=1,
+    arrowwidth=2,
+    arrowcolor=SNOW,
+    text="<b>100% beviljade – en inspiration?</b>",
+    font=dict(size=15, family="Arial"),
+)
 
     # update the hover for cleaner visualization
     figure.update_traces(
