@@ -7,10 +7,25 @@ import duckdb
 
 
 df = pd.read_excel(DATA_DIRECTORY / "resultat-2024-for-kurser-inom-yh.xlsx", sheet_name="Lista ansökningar")
+df_stud = pd.read_excel("data/studerande-och-examinerade-inom-smala-yrkesomraden-2014-2024.xlsx", sheet_name="studerande", skiprows=3).copy()
 
 filtered_df = df.copy()  
 df_bar_chart = df.copy()
 
+
+#----for bubble chart
+category_column = df_stud.columns[0]
+year_columns = df_stud.columns[1:]
+
+df_melted = df_stud.melt(
+    id_vars=[category_column], 
+    value_vars=year_columns,    
+    var_name='År',              
+    value_name='Antal'          
+    )
+
+df_melted = df_melted[df_melted[category_column] != 'Totalt']
+#---------
 
 pio.renderers.default = "browser"
 

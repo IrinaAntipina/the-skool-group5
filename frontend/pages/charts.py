@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 #from utils.constants import DATA_DIRECTORY
 from assets.color_codes import SEA_GREEN, SALMON_RED, SNOW
-from backend.data_processing import filtered_df, df_bar_chart, df_geo, swedish_coordinates, geojson 
+from backend.data_processing import filtered_df, df_bar_chart, df_geo, swedish_coordinates, geojson, df_melted, category_column, year_columns
 
 
 # Irina---------------------------------------------
@@ -265,6 +265,102 @@ def geo_chart(df_geo):
     return fig
 
 
+# bubbles chart---------------------------------------------------------
 
 
+unique_years = sorted(df_melted['År'].unique())
+years = [str(year) for year in unique_years]
+selected_year = years[0]
 
+def filter_by_year(state):
+    try:
+        year_value = int(state.selected_year)
+        filtered_data = df_melted[df_melted['År'] == year_value]
+        
+        if len(filtered_data) == 0:
+            fig = go.Figure()
+            fig.update_layout(
+                title=f'Inga data för år {year_value}',
+                height=600
+            )
+            state.bub_animated_figure = fig
+            return
+        
+        fig = px.scatter(
+            filtered_data,
+            x=category_column,            
+            y='Antal',                       
+            size='Antal',                   
+            color=category_column,          
+            hover_name=category_column,      
+            size_max=50,                    
+            title=f'Studerande i yrkeshögskolans smala yrkesområden {year_value}, efter utbildningsområde',
+            labels={'År': 'År', 'Antal': 'Antal', category_column: 'Utbildningsområde'},
+            template="plotly_white"          
+        )
+
+        fig.update_layout(
+            xaxis=dict(
+                showticklabels=False,
+                title=None
+            ),
+            yaxis=dict(
+                title='Antal'
+            ),
+            legend=dict(
+                title='Utbildningsområde',
+                orientation='v',             
+                yanchor='top',               
+                y=1,                        
+                xanchor='left',              
+                x=1.05,                      
+            ),
+            margin=dict(r=150),
+            height=600
+        )
+        
+        state.bub_animated_figure = fig
+    except Exception as e:
+        print(f"Error in filter_by_year: {e}")
+        fig = go.Figure()
+        fig.update_layout(title=f"Error: {str(e)}")
+        state.bub_animated_figure = fig
+
+def create_initial_chart():
+    year_value = int(selected_year)  
+    filtered_data = df_melted[df_melted['År'] == year_value]
+    
+    fig = px.scatter(
+        filtered_data,
+        x=category_column,            
+        y='Antal',                     
+        size='Antal',                  
+        color=category_column,          
+        hover_name=category_column,      
+        size_max=50,                    
+        title=f'Studerande i yrkeshögskolans smala yrkesområden {year_value}, efter utbildningsområde',
+        labels={'År': 'År', 'Antal': 'Antal', category_column: 'Utbildningsområde'},
+        template="plotly_white"          
+    )
+
+    fig.update_layout(
+        xaxis=dict(
+            showticklabels=False,
+            title=None
+        ),
+        yaxis=dict(
+            title='Antal'
+        ),
+        legend=dict(
+            title='Utbildningsområde',
+            orientation='v',             
+            yanchor='top',               
+            y=1,                        
+            xanchor='left',              
+            x=1.05,                      
+        ),
+        margin=dict(r=150),
+        height=600
+    )
+    
+    return fig

@@ -1,8 +1,8 @@
 import taipy.gui.builder as tgb
 from taipy.gui import Gui
 from utils.constants import DATA_DIRECTORY
-import pandas as pd
-import os
+import plotly.express as px
+import plotly.graph_objects as go
 from backend.data_processing import (
     filtered_df,
     df_geo,
@@ -11,7 +11,9 @@ from backend.data_processing import (
     get_municipalities,
     get_schools,
     get_educations,
-    apply_filters
+    apply_filters,
+    df_melted,
+    category_column
 )
 
 
@@ -23,7 +25,14 @@ from .charts import (
     get_summary_stats,
     create_additional_chart,
     geo_chart,
+    create_initial_chart,
+    filter_by_year,
+    unique_years,
+    years,
+    selected_year
 )
+
+
 
 selected_educational_area = ""
 selected_municipality = ""
@@ -94,6 +103,7 @@ pie_data = prepare_pie_data(filtered_df)
 map_data = prepare_map_data(filtered_df)
 pie_figure = create_pie_chart(pie_data)
 geo_figure = geo_chart(df_geo)
+bub_animated_figure = create_initial_chart()
 heat_map_figure = create_heat_map(map_data, show_map=True)
 schools_chart = create_additional_chart(filtered_df)
 
@@ -102,10 +112,6 @@ with tgb.Page() as page:
         tgb.navbar()
         with tgb.part(class_name="title-card"):
             tgb.text("# MYH dashboard", mode="md")
-            # tgb.text(
-            #     "Detta är en dashboard för att visa statistik och information om ansökningsomgång 2024",
-            #     mode="md",
-            # )
 
         with tgb.part(class_name="main-container"):
             with tgb.part(class_name="left-column"):
@@ -176,7 +182,20 @@ with tgb.Page() as page:
                             class_name="description-text",
                         )
                         with tgb.part(class_name="map-card"):
-                            tgb.chart(figure="{heat_map_figure}")
+                                with tgb.part(class_name="selector-row"):
+                                    with tgb.part(style="display: flex; align-items: center; margin-bottom: 10px;"):
+                                            tgb.text("### Studerande per utbildningsområde", mode="md", style="flex-grow: 1;")
+                                            tgb.text("Välj år:", width="60px")
+                                            tgb.selector(
+                                                value="{selected_year}",
+                                                lov="{years}",
+                                                on_change=filter_by_year,
+                                                dropdown=True,
+                                                width="100px"
+                                            )
+                                    with tgb.part(class_name="card"):
+                                        tgb.chart(figure="{bub_animated_figure}")
+                                        
                         with tgb.part(class_name="map-card"):
                             tgb.chart(figure="{geo_figure}")
 
