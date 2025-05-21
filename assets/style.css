@@ -51,24 +51,37 @@
 .middle-section,
 .table-section,
 .pie-section,
-.chart-section {
+.chart-section,
+.map-card {  
   background-color: #f5f5f5;
   padding: 15px;
   border-radius: 8px;
   box-sizing: border-box;
 }
 
+
+@media (prefers-color-scheme: dark) {
+  .filter-section,
+  .kpi-section,
+  .middle-section,
+  .table-section,
+  .pie-section,
+  .chart-section,
+  .map-card {
+    background-color: #162335;
+  }
+}
+
+
 .middle-section {
-  background-color: #ffffff;
+  background-color: transparent;
 }
 
 .table-section {
   background-color: #fafafa;
 }
 
-
 @media (max-width: 1200px) {
- 
   .main-container {
     flex-direction: column;
   }
@@ -79,7 +92,6 @@
     width: 100%;
   }
 }
-
 
 .left-side {
   width: 50%;
@@ -96,7 +108,6 @@
 }
 
 @media (max-width: 1200px) {
- 
   .main-container {
     flex-direction: column;
   }
@@ -105,4 +116,90 @@
   .right-side {
     width: 100%;
   }
+}
+
+.card {
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.bubble-chart-container {
+  display: flex;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.chart-area {
+  flex: 7;
+  min-width: 0;
+}
+
+.controls-area {
+  flex: 3;
+  min-width: 200px;
+  padding-left: 15px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.map-card h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+}
+
+.map-card h4 {
+  margin-top: 15px;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.selector-container {
+  margin-bottom: 20px;
+}
+
+.legend-list {
+  margin-top: 10px;
+  padding-left: 5px;
+}
+
+.legend-list p {
+  margin: 6px 0;
+  font-size: 0.9rem;
+}
+
+.tp-Chart {
+  background: transparent !important;
+}
+
+@media (max-width: 992px) {
+  .bubble-chart-container {
+    flex-direction: column;
+  }
+  
+  .chart-area,
+  .controls-area {
+    flex: 1;
+    width: 100%;
+  }
+  
+  .controls-area {
+    padding-left: 0;
+    border-left: none;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+.middle-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.chart-area .tp-Chart,
+.pie-grid .tp-Chart,
+.map-card .tp-Chart {
+  margin: 0 !important;
+  padding: 0 !important;
 }

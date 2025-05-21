@@ -32,6 +32,9 @@ from .charts import (
     selected_year
 )
 
+initial_year_value = int(selected_year)
+initial_filtered_data = df_melted[df_melted['År'] == initial_year_value]
+categories = initial_filtered_data[category_column].unique().tolist()
 
 
 selected_educational_area = ""
@@ -114,6 +117,7 @@ with tgb.Page() as page:
             tgb.text("# MYH dashboard", mode="md")
 
         with tgb.part(class_name="main-container"):
+  
             with tgb.part(class_name="left-column"):
                 with tgb.part(class_name="filter-section"):
                     with tgb.part(class_name="filter-grid"):
@@ -174,35 +178,55 @@ with tgb.Page() as page:
                             tgb.text("*Värdena uppdateras baserat på valda filter*", mode="md", class_name="filter-note")
 
 
+       
             with tgb.part(class_name="middle-column"):
                 with tgb.part(class_name="middle-section"):
                     with tgb.part(class_name="middle-grid"):
-                        tgb.text(
-                            "Översikt av ansökningsresultat",
-                            class_name="description-text",
-                        )
+                  
                         with tgb.part(class_name="map-card"):
-                                with tgb.part(class_name="selector-row"):
-                                    with tgb.part(style="display: flex; align-items: center; margin-bottom: 10px;"):
-                                            tgb.text("### Studerande per utbildningsområde", mode="md", style="flex-grow: 1;")
-                                            tgb.text("Välj år:", width="60px")
-                                            tgb.selector(
-                                                value="{selected_year}",
-                                                lov="{years}",
-                                                on_change=filter_by_year,
-                                                dropdown=True,
-                                                width="100px"
-                                            )
-                                    with tgb.part(class_name="card"):
-                                        tgb.chart(figure="{bub_animated_figure}")
-                                        
+                            tgb.text("### Fördelning av beviljade platser", mode="md")
+                            tgb.chart(figure="{pie_figure}")
+                    
+               
                         with tgb.part(class_name="map-card"):
+                            tgb.text("### Geografisk fördelning", mode="md")
                             tgb.chart(figure="{geo_figure}")
 
+       
             with tgb.part(class_name="right-column"):
                 with tgb.part(class_name="pie-section"):
-                    with tgb.part(class_name="pie-grid"):
-                        with tgb.part(class_name="card"):
-                            tgb.chart(figure="{pie_figure}")
+                    with tgb.part(class_name="map-card"):
+                 
+                        tgb.text("### Studerande per utbildningsområde", mode="md")
+                        
+                       
+                        with tgb.part(class_name="bubble-chart-container"):
+                           
+                            with tgb.part(class_name="chart-area"):
+                                tgb.chart(figure="{bub_animated_figure}")
+                            
+                          
+                            with tgb.part(class_name="controls-area"):
+                                
+                                tgb.text("#### År: {selected_year}", mode="md")
+                                
+                       
+                                with tgb.part(class_name="selector-container"):
+                                    tgb.text("Välj år:", style="font-weight: bold; margin-bottom: 5px;")
+                                    tgb.selector(
+                                        value="{selected_year}",
+                                        lov="{years}",
+                                        on_change=filter_by_year,
+                                        dropdown=True,
+                                        width="100%"
+                                    )
+                                
+                           
+                                tgb.text("#### Utbildningsområde", mode="md")
+                                with tgb.part(class_name="legend-list"):
+                                    emojis = ["🔵", "🔴", "🟢", "🟣", "🟠", "🔷", "🟥", "🟩", "🟪", "🟨"]
+                                    for i, cat in enumerate(categories):
+                                        emoji = emojis[i % len(emojis)]
+                                        tgb.text(f"{emoji} {cat}")
 
 dashboard_page = page

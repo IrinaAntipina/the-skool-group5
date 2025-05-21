@@ -284,6 +284,7 @@ def filter_by_year(state):
                 height=600
             )
             state.bub_animated_figure = fig
+            state.categories = []
             return
         
         fig = px.scatter(
@@ -294,7 +295,7 @@ def filter_by_year(state):
             color=category_column,          
             hover_name=category_column,      
             size_max=50,                    
-            title=f'Studerande i yrkeshögskolans smala yrkesområden {year_value}, efter utbildningsområde',
+            title="",
             labels={'År': 'År', 'Antal': 'Antal', category_column: 'Utbildningsområde'},
             template="plotly_white"          
         )
@@ -307,24 +308,23 @@ def filter_by_year(state):
             yaxis=dict(
                 title='Antal'
             ),
-            legend=dict(
-                title='Utbildningsområde',
-                orientation='v',             
-                yanchor='top',               
-                y=1,                        
-                xanchor='left',              
-                x=1.05,                      
-            ),
-            margin=dict(r=150),
+
+            showlegend=False,
+            margin=dict(r=20, l=20, t=20, b=20),
             height=600
         )
         
         state.bub_animated_figure = fig
+        
+        state.categories = filtered_data[category_column].unique().tolist()
+        
     except Exception as e:
         print(f"Error in filter_by_year: {e}")
         fig = go.Figure()
         fig.update_layout(title=f"Error: {str(e)}")
         state.bub_animated_figure = fig
+        state.categories = []
+
 
 def create_initial_chart():
     year_value = int(selected_year)  
@@ -338,7 +338,7 @@ def create_initial_chart():
         color=category_column,          
         hover_name=category_column,      
         size_max=50,                    
-        title=f'Studerande i yrkeshögskolans smala yrkesområden {year_value}, efter utbildningsområde',
+        title="",
         labels={'År': 'År', 'Antal': 'Antal', category_column: 'Utbildningsområde'},
         template="plotly_white"          
     )
@@ -351,15 +351,9 @@ def create_initial_chart():
         yaxis=dict(
             title='Antal'
         ),
-        legend=dict(
-            title='Utbildningsområde',
-            orientation='v',             
-            yanchor='top',               
-            y=1,                        
-            xanchor='left',              
-            x=1.05,                      
-        ),
-        margin=dict(r=150),
+  
+        showlegend=False,
+        margin=dict(r=20, l=20, t=20, b=20),
         height=600
     )
     
