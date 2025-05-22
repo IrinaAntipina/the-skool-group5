@@ -6,18 +6,18 @@ import plotly.express as px
 import plotly.graph_objects as go
 #from utils.constants import DATA_DIRECTORY
 from assets.color_codes import SEA_GREEN, SALMON_RED, SNOW
-from backend.data_processing import filtered_df, df_bar_chart, df_geo, swedish_coordinates, geojson, df_melted, category_column, year_columns
-
+from backend.data_processing import filtered_df, df_bar_chart, df_geo, swedish_coordinates, geojson, df_melted, category_column, year_columns, apply_filters
+#from frontend.pages.dashboard import apply_filters_to_dashboard
 
 # Irina---------------------------------------------
 
 
-def prepare_pie_data(filtered_df):
+# def prepare_pie_data(filtered_df):
 
-    result_df = filtered_df[filtered_df['Beslut'] == 'Beviljad']
-    area_stats = result_df.groupby('Utbildningsområde')['Antal beviljade platser start 2024'].sum().sort_values(ascending=False)
+#     result_df = filtered_df[filtered_df['Beslut'] == 'Beviljad']
+#     area_stats = result_df.groupby('Utbildningsområde')['Antal beviljade platser start 2024'].sum().sort_values(ascending=False)
     
-    return area_stats
+#     return area_stats
 
 def prepare_map_data(filtered_df):
 
@@ -32,70 +32,69 @@ def prepare_map_data(filtered_df):
     return kommun_stats
 
 
-def create_pie_chart(filtered_df):
-
+  
+def prepare_pie_data_filtered(filtered_df):
     if len(filtered_df) == 0:
+        return pd.Series({"Inga data": 1}), "Ingen data"
+    
+    result_df = filtered_df[filtered_df['Beslut'] == 'Beviljad']
+    
+    if result_df['Anordnare namn'].nunique() == 1:
+        area_stats = result_df.groupby('Utbildningsområde')['Antal beviljade platser start 2024'].sum().sort_values(ascending=False)
+        title = f"Fördelning av beviljade platser per utbildningsområde för {result_df['Anordnare namn'].iloc[0]}"
+    
+    elif result_df['Kommun'].nunique() == 1:
+        school_stats = result_df.groupby('Anordnare namn')['Antal beviljade platser start 2024'].sum().sort_values(ascending=False)
+        title = f"Fördelning av beviljade platser per skola i {result_df['Kommun'].iloc[0]}"
+    
+    elif result_df['Utbildningsområde'].nunique() == 1:
+        school_stats = result_df.groupby('Anordnare namn')['Antal beviljade platser start 2024'].sum().sort_values(ascending=False)
+        title = f"Fördelning av beviljade platser per skola inom {result_df['Utbildningsområde'].iloc[0]}"
+    
+    else:
+        area_stats = result_df.groupby('Utbildningsområde')['Antal beviljade platser start 2024'].sum().sort_values(ascending=False)
+        title = "Fördelning av beviljade platser per utbildningsområde"
+    
+    if 'area_stats' in locals():
+        return area_stats, title
+    else:
+        return school_stats, title
+    
+
+def on_change_year(state):
+    filtered_result = apply_filters(
+        filtered_df, 
+        state.selected_educational_area,
+        state.selected_municipality,
+        state.selected_school,
+        state.selected_education
+    )
+    
+    filtered_df_local = filtered_result[0]
+    
+    # update pie
+    pie_data, pie_title = prepare_pie_data_filtered(filtered_df_local)
+    state.pie_figure = create_pie_chart_with_title(pie_data, pie_title)
+    
+
+
+def create_pie_chart_with_title(data_series, title):
+    if len(data_series) == 0:
         return go.Figure().add_trace(go.Pie(labels=['Ingen data'], values=[1]))
     
     fig = px.pie(
-        values=filtered_df.values, 
-        names=filtered_df.index,
-        title='Fördelning av beviljade platser per utbildningsområde'
+        values=data_series.values, 
+        names=data_series.index,
+        title=title
     )
-    fig.update_traces(textposition='inside', textinfo='percent+label')
+    fig.update_traces(
+        textposition='inside', 
+        textinfo='percent+label',
+        showlegend=False
+    )
     fig.update_layout(
         plot_bgcolor="white",
         margin=dict(t=50, l=0, r=0, b=0),
-        font=dict(size=12)
-    )
-    return fig
-
-def create_heat_map(filtered_df, show_map=True):
-
-    if len(filtered_df) == 0:
-        return go.Figure().add_trace(go.Bar(x=['Ingen data'], y=[1]))
-    
-    if show_map and 'lat' in filtered_df.columns and 'lon' in filtered_df.columns:
-      
-        df_valid = filtered_df.dropna(subset=['lat', 'lon'])
-        if len(df_valid) > 0:
-            try:
-         
-                fig = px.scatter_mapbox(
-                    df_valid,
-                    lat='lat',
-                    lon='lon',
-                    size='Antal_platser',
-                    hover_name='Kommun',
-                    hover_data=['Antal_platser'],
-                    mapbox_style='open-street-map',
-                    zoom=4,
-                    title='Geografisk fördelning av YH-program',
-                    height=600
-                )
-                fig.update_layout(
-                    margin=dict(t=50, l=0, r=0, b=0),
-                )
-                return fig
-            except Exception as e:
-                print(f"Error creating map: {e}")
-                pass
-    
-   
-    df_sorted = filtered_df.sort_values('Antal_platser', ascending=True).tail(15)
-    fig = px.bar(
-        df_sorted,
-        x='Antal_platser',
-        y='Kommun',
-        orientation='h',
-        title='Top 15 kommuner med flest beviljade platser',
-        labels={'Antal_platser': 'Antal platser', 'Kommun': 'Kommun'}
-    )
-    fig.update_layout(
-        plot_bgcolor="white",
-        margin=dict(t=50, l=120, r=30, b=50),
-        yaxis={'categoryorder': 'total ascending'},
-        height=500,
         font=dict(size=12)
     )
     return fig
