@@ -6,8 +6,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 #from utils.constants import DATA_DIRECTORY
 from assets.color_codes import SEA_GREEN, SALMON_RED, SNOW
-from backend.data_processing import filtered_df, df_bar_chart, df_geo, swedish_coordinates, geojson, df_melted, category_column, year_columns, apply_filters
+from backend.data_processing import filtered_df, df_bar_chart, df_geo, swedish_coordinates, geojson, df_melted,category_column, year_columns, apply_filters, map_processing
 #from frontend.pages.dashboard import apply_filters_to_dashboard
+from difflib import get_close_matches
+import numpy as np
 
 # Irina---------------------------------------------
 
@@ -357,3 +359,76 @@ def create_initial_chart():
     )
     
     return fig
+
+#----------------------------------------------------------------------------------------
+# sweden map
+
+df_combine, df_regions, json_data, region_codes = map_processing()
+
+def create_map(selected_year):
+    df_year = df_regions[df_regions["År"] == selected_year].reset_index(drop=True)
+    df_combine_statistic = df_combine[df_combine["År"] == selected_year]
+
+    log_approved = np.log(df_year["Beviljade"] + 1)
+
+    matched_names = [
+        get_close_matches(län, region_codes.keys())[0] for län in df_year["Län"]
+    ]
+    region_ids = [region_codes[name] for name in matched_names]
+
+    decisions = df_combine_statistic["Beslut"].value_counts()
+    approved = decisions.get("Beviljad", 0)
+    total = decisions.sum()
+    approval_rate = approved / total * 100 if total > 0 else 0
+
+    fig = go.Figure(
+        go.Choroplethmapbox(
+            geojson=json_data,
+            locations=region_ids,
+            z=log_approved,
+            featureidkey="properties.ref:se:länskod",
+            colorscale="Greens",
+            showscale=False,
+            customdata=df_year["Beviljade"],
+            text=df_year["Län"],
+            hovertemplate="<b>%{text}</b><br>Beviljade utbildningar %{customdata}<extra></extra>",
+            marker_line_width=0.3,
+        )
+    )
+
+    fig.update_layout(
+        mapbox=dict(style="white-bg", zoom=3.3, center=dict(lat=62.6952, lon=13.9149)),
+        width=470,
+        height=500,
+        margin=dict(r=0, t=50, l=0, b=0),
+        title=dict(
+            text=f"""
+                <b>Antalet beviljade</b>
+                <br>utbildningar per län
+                <br>inom YH i Sverige för 
+                <br>år <b>{selected_year}</b>.
+                <br>
+                <br>Den gröna färgen</b>
+                <br>är gradvis mörkare</b>
+                <br>i relation till hur</b>
+                <br>många utbildningar</b>
+                <br>länet fått beviljat.</b>
+                <br>
+                <br><b>{approved}</b> av totalt <b>{total}</b>
+                <br>ansökningar har
+                <br>godkänts,
+                <br>vilket innebär 
+                <br>en beviljandegrad på
+                <br><b>{approval_rate:.0f}%</b>.
+                <br>
+            """,
+            x=0.06,
+            y=0.75,
+            font=dict(size=14, family="Arial"),
+        ),
+    )
+
+    return fig
+
+
+#--------------------------------------------------------------------------------------------------------------------

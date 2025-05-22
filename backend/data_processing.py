@@ -4,6 +4,7 @@ import plotly.io as pio
 import requests
 import plotly.express as px
 import duckdb
+import json
 
 
 df = pd.read_excel(DATA_DIRECTORY / "resultat-2024-for-kurser-inom-yh.xlsx", sheet_name="Lista ansökningar")
@@ -212,3 +213,36 @@ def apply_filters(df, educational_area="", municipality="", school="", education
     kpi_results = kpi(temp_df)
     
     return temp_df, kpi_results
+
+
+#-----------------------------------------------------------------------
+
+# sweden map processing
+
+def map_processing():
+    df_combine = pd.read_excel("data/2022-2024.xlsx")
+
+    df_regions = duckdb.query(
+        """--sql
+        SELECT
+            län,
+            CAST(COUNT_IF(beslut = 'Beviljad') AS integer) AS Beviljade,
+            År
+        FROM df_combine
+        WHERE län != 'Flera kommuner'
+        GROUP BY År, län
+        ORDER BY År, beviljade DESC, län
+    """
+    ).df()
+
+    with open("assets/swedish_regions.geojson", "r", encoding="utf-8") as file:
+        json_data = json.load(file)
+
+    json_data.get("features")[0].get("properties")
+
+    properties = [feature.get("properties") for feature in json_data.get("features")]
+    region_codes = {
+        property.get("name"): property.get("ref:se:länskod") for property in properties
+    }
+
+    return df_combine, df_regions, json_data, region_codes

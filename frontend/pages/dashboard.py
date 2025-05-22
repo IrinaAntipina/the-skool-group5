@@ -1,8 +1,4 @@
 import taipy.gui.builder as tgb
-from taipy.gui import Gui
-from utils.constants import DATA_DIRECTORY
-import plotly.express as px
-import plotly.graph_objects as go
 from backend.data_processing import (
     filtered_df,
     df_geo,
@@ -13,9 +9,9 @@ from backend.data_processing import (
     get_educations,
     apply_filters,
     df_melted,
-    category_column
+    category_column,
+    map_processing
 )
-
 
 from .charts import (
     #prepare_pie_data,
@@ -31,7 +27,8 @@ from .charts import (
     unique_years,
     years,
     selected_year,
-    on_change_year
+    on_change_year,
+    create_map
 )
 
 # initial bubble chart 
@@ -205,7 +202,17 @@ geo_figure = geo_chart(df_geo)
 bub_animated_figure = create_initial_chart()
 schools_chart = create_additional_chart(filtered_df)
 
+#------------------------------------
+# Sweden map
+df_combine, df_regions, json_data, region_codes = map_processing()
 
+select_year = 2024
+
+def update_sweden_map(state):
+    state.map_figure = create_map(state.select_year)
+
+map_figure = create_map(select_year)
+#------------------------------------
 
 with tgb.Page() as page:
     with tgb.part(class_name="container-card"):
@@ -258,7 +265,7 @@ with tgb.Page() as page:
                                 on_change=on_change_year,  
                                 dropdown=True,
                                 width="100%",
-                                label="älj år:"
+                                label="Välj år:"
                             )
     
 
@@ -302,7 +309,7 @@ with tgb.Page() as page:
                         with tgb.part(class_name="map-card"):
                             tgb.text("### Geografisk fördelning", mode="md")
                             with tgb.part(style="width: 100%; height: 500px;"): 
-                                tgb.chart(figure="{geo_figure}")
+                                tgb.chart(figure="{map_figure}")
 
        
             with tgb.part(class_name="right-column"):
