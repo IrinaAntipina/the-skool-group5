@@ -12,6 +12,9 @@ df_stud = pd.read_excel("data/studerande-och-examinerade-inom-smala-yrkesomraden
 filtered_df = df.copy()  
 df_bar_chart = df.copy()
 
+filtered_df_year = filtered_df.copy()
+filtered_df_year['År'] = 2024  # year by default
+
 
 #----for bubble chart
 category_column = df_stud.columns[0]
@@ -188,7 +191,7 @@ def get_educations(df=filtered_df, educational_area="", municipality="", school=
     return [""] + sorted(available_educations.tolist())
 
 
-def apply_filters(df, educational_area="", municipality="", school="", education=""):
+def apply_filters(df, educational_area="", municipality="", school="", education="", year=None):
     
     temp_df = df.copy()
     
@@ -200,6 +203,11 @@ def apply_filters(df, educational_area="", municipality="", school="", education
         temp_df = temp_df[temp_df['Anordnare namn'] == school]
     if education:
         temp_df = temp_df[temp_df['Utbildningsnamn'] == education]
+    
+
+    if year and year != "":
+
+        temp_df = temp_df[temp_df['Utbildningsnamn'].str.contains(str(year))]
     
     kpi_results = kpi(temp_df)
     
