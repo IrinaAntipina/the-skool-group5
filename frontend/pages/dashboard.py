@@ -20,7 +20,7 @@ from .charts import (
   #  create_pie_chart,
     create_pie_chart_with_title,
     get_summary_stats,
-    create_additional_chart,
+    #create_additional_chart,
     geo_chart,
     create_initial_chart,
     filter_by_year,
@@ -29,6 +29,7 @@ from .charts import (
     selected_year,
     on_change_year,
     create_map
+
 )
 
 # initial bubble chart 
@@ -73,6 +74,9 @@ def apply_filters_to_dashboard(state):
     # update pie
     pie_data, pie_title = prepare_pie_data_filtered(filtered_df_local)
     state.pie_figure = create_pie_chart_with_title(pie_data, pie_title)
+    
+    # update map
+    state.map_figure = create_map(int(state.selected_year))
 
 
 
@@ -108,17 +112,27 @@ def on_change_educational_area(state):
     state.schools = get_schools(filtered_df, state.selected_educational_area, "")
     state.educations = get_educations(filtered_df, state.selected_educational_area, "", "")
     
-    # filters values to default
+    # Resetting the selected values ​​of dependent filters
     state.selected_municipality = ""
     state.selected_school = ""
     state.selected_education = ""
 
 
 def on_change_municipality(state):
-    state.schools = get_schools(filtered_df, state.selected_educational_area, state.selected_municipality)
-    state.educations = get_educations(filtered_df, state.selected_educational_area, state.selected_municipality, "")
+    state.schools = get_schools(
+        filtered_df, 
+        state.selected_educational_area, 
+        state.selected_municipality
+    )
+
+    state.educations = get_educations(
+        filtered_df, 
+        state.selected_educational_area, 
+        state.selected_municipality, 
+        ""
+    )
     
-    # filters values to default
+    # Resetting the selected values ​​of dependent filters
     state.selected_school = ""
     state.selected_education = ""
 
@@ -132,6 +146,7 @@ def on_change_school(state):
         state.selected_school
     )
     
+
 
 # def on_change_school(state):
 
@@ -173,9 +188,12 @@ def on_change_year(state):
     # update pie
 
     pie_data = prepare_pie_data_filtered(filtered_df_local)
-    state.pie_figure = create_pie_chart_with_title(pie_data)
+    state.pie_figure = create_pie_chart_with_title(pie_data, title=pie_title)
 
 
+
+def on_change_map_year(state):
+    state.map_figure = create_map(int(state.selected_year))
 
 # inicial default kpi values 
 initial_kpi_results = kpi(filtered_df)
@@ -185,8 +203,6 @@ rejected_applications = total_applications - approved_applications
 total_approved_places = initial_kpi_results['total_approved_places']
 unique_schools = initial_kpi_results['unique_schools']
 approval_rate = initial_kpi_results['approval_rate']
-
-
 
 # pie_data, pie_title = prepare_pie_data_filtered(filtered_df, selected_year)
 # pie_figure = create_pie_chart_with_title(pie_data, pie_title)
@@ -200,7 +216,7 @@ pie_data, pie_title = prepare_pie_data_filtered(filtered_df)
 pie_figure = create_pie_chart_with_title(pie_data, pie_title)
 geo_figure = geo_chart(df_geo)
 bub_animated_figure = create_initial_chart()
-schools_chart = create_additional_chart(filtered_df)
+#schools_chart = create_additional_chart(filtered_df)
 
 #------------------------------------
 # Sweden map
@@ -309,8 +325,16 @@ with tgb.Page() as page:
                         with tgb.part(class_name="map-card"):
                             tgb.text("### Geografisk fördelning", mode="md")
                             with tgb.part(style="width: 100%; height: 500px;"): 
+                                tgb.selector(
+                                    value="{selected_year}",
+                                    lov="{years}",
+                                    on_change=on_change_map_year,  
+                                    dropdown=True,
+                                    width="100%",
+                                    label="Välj år:"
+                                )
                                 tgb.chart(figure="{map_figure}")
-
+                                
        
             with tgb.part(class_name="right-column"):
                 with tgb.part(class_name="map-card", style="height: auto;"):
