@@ -7,7 +7,7 @@ import duckdb
 import json
 
 
-df = pd.read_excel(DATA_DIRECTORY / "resultat-2024-for-kurser-inom-yh.xlsx", sheet_name="Lista ansökningar")
+df = pd.read_excel(DATA_DIRECTORY / "2022-2024.xlsx")
 df_stud = pd.read_excel("data/studerande-och-examinerade-inom-smala-yrkesomraden-2014-2024.xlsx", sheet_name="studerande", skiprows=3).copy()
 
 filtered_df = df.copy()  
@@ -15,6 +15,7 @@ df_bar_chart = df.copy()
 
 filtered_df_year = filtered_df.copy()
 filtered_df_year['År'] = 2024  # year by default
+
 
 
 #----for bubble chart
@@ -71,92 +72,112 @@ geojson = requests.get(url_geojson).json()
 
 
 def kpi(filtered_df):
-
-    import duckdb
-    
-    total_ans = duckdb.query(
-        """--sql
-    SELECT 
-        "Anordnare namn" AS Anordnare,
-        COUNT(*) FILTER (WHERE Beslut = 'Beviljad') AS Beviljad,
-        COUNT(*) FILTER (WHERE Beslut = 'Avslag') AS Avslag,
-        COUNT(*) AS Totalt
-    FROM filtered_df 
-    GROUP BY Anordnare
-    ORDER BY Totalt DESC
-    """
-    ).df()
-
-    bevil_platser = duckdb.query(
-        """--sql
-        SELECT
-            "Anordnare namn" AS Anordnare,
-            COUNT(*) FILTER (WHERE Beslut = 'Beviljad') AS Beviljad
-        FROM filtered_df
-        GROUP BY Anordnare
-    """
-    ).df()
-
-    anordnare = duckdb.query(
-        """--sql
-        SELECT
-            "Anordnare namn" AS Anordnare,
-            COUNT(*) AS Totalt
-        FROM filtered_df
-        GROUP BY Anordnare
-        ORDER BY Totalt DESC
-    """
-    ).df()
-
-    bevil_procent = duckdb.query(
-        """--sql
-        SELECT 
-            "Anordnare namn" AS Anordnare,
-            COUNT(*) FILTER (WHERE Beslut = 'Beviljad') AS Beviljad,
-            COUNT(*) FILTER (WHERE Beslut = 'Avslag') AS Avslag,
-            COUNT(*) AS Totalt,
-            CAST(COUNT(*) FILTER (WHERE Beslut = 'Beviljad') AS FLOAT) / COUNT(*) * 100 AS Procent
-        FROM filtered_df 
-        GROUP BY Anordnare
-        ORDER BY Totalt DESC
-    """
-    ).df()
-    
     total_applications = len(filtered_df)
     approved_applications = len(filtered_df[filtered_df['Beslut'] == 'Beviljad'])
-    total_approved_places = filtered_df[filtered_df['Beslut'] == 'Beviljad']['Antal beviljade platser start 2024'].sum()
+    
+    total_approved_places = filtered_df[filtered_df['Beslut'] == 'Beviljad']['Beviljade platser totalt'].sum()
+    
     approval_rate = approved_applications / total_applications * 100 if total_applications > 0 else 0
-    unique_schools = filtered_df['Anordnare namn'].nunique()
+    unique_schools = filtered_df['Utbildningsanordnare administrativ enhet'].nunique()
     unique_municipalities = filtered_df['Kommun'].nunique()
     unique_areas = filtered_df['Utbildningsområde'].nunique()
 
-    avg_places = total_approved_places / approved_applications if approved_applications > 0 else 0
-    
-    kpi_dict = {
-        'total_ans': total_ans,
-        'bevil_platser': bevil_platser,
-        'anordnare': anordnare,
-        'bevil_procent': bevil_procent,
+    return {
         'total_applications': total_applications,
         'approved_applications': approved_applications,
         'total_approved_places': total_approved_places,
         'approval_rate': approval_rate,
         'unique_schools': unique_schools,
         'unique_municipalities': unique_municipalities,
-        'unique_areas': unique_areas,
-        'avg_places': avg_places
+        'unique_areas': unique_areas
     }
+
+
+# def kpi(filtered_df):
+
+#     import duckdb
     
-    return kpi_dict
+#     total_ans = duckdb.query(
+#         """--sql
+#     SELECT 
+#         "Anordnare namn" AS Anordnare,
+#         COUNT(*) FILTER (WHERE Beslut = 'Beviljad') AS Beviljad,
+#         COUNT(*) FILTER (WHERE Beslut = 'Avslag') AS Avslag,
+#         COUNT(*) AS Totalt
+#     FROM filtered_df 
+#     GROUP BY Anordnare
+#     ORDER BY Totalt DESC
+#     """
+#     ).df()
+
+#     bevil_platser = duckdb.query(
+#         """--sql
+#         SELECT
+#             "Anordnare namn" AS Anordnare,
+#             COUNT(*) FILTER (WHERE Beslut = 'Beviljad') AS Beviljad
+#         FROM filtered_df
+#         GROUP BY Anordnare
+#     """
+#     ).df()
+
+#     anordnare = duckdb.query(
+#         """--sql
+#         SELECT
+#             "Anordnare namn" AS Anordnare,
+#             COUNT(*) AS Totalt
+#         FROM filtered_df
+#         GROUP BY Anordnare
+#         ORDER BY Totalt DESC
+#     """
+#     ).df()
+
+#     bevil_procent = duckdb.query(
+#         """--sql
+#         SELECT 
+#             "Anordnare namn" AS Anordnare,
+#             COUNT(*) FILTER (WHERE Beslut = 'Beviljad') AS Beviljad,
+#             COUNT(*) FILTER (WHERE Beslut = 'Avslag') AS Avslag,
+#             COUNT(*) AS Totalt,
+#             CAST(COUNT(*) FILTER (WHERE Beslut = 'Beviljad') AS FLOAT) / COUNT(*) * 100 AS Procent
+#         FROM filtered_df 
+#         GROUP BY Anordnare
+#         ORDER BY Totalt DESC
+#     """
+#     ).df()
+    
+#     total_applications = len(filtered_df)
+#     approved_applications = len(filtered_df[filtered_df['Beslut'] == 'Beviljad'])
+#     total_approved_places = filtered_df[filtered_df['Beslut'] == 'Beviljad']['Antal beviljade platser start 2024'].sum()
+#     approval_rate = approved_applications / total_applications * 100 if total_applications > 0 else 0
+#     unique_schools = filtered_df['Anordnare namn'].nunique()
+#     unique_municipalities = filtered_df['Kommun'].nunique()
+#     unique_areas = filtered_df['Utbildningsområde'].nunique()
+
+#     avg_places = total_approved_places / approved_applications if approved_applications > 0 else 0
+    
+#     kpi_dict = {
+#         'total_ans': total_ans,
+#         'bevil_platser': bevil_platser,
+#         'anordnare': anordnare,
+#         'bevil_procent': bevil_procent,
+#         'total_applications': total_applications,
+#         'approved_applications': approved_applications,
+#         'total_approved_places': total_approved_places,
+#         'approval_rate': approval_rate,
+#         'unique_schools': unique_schools,
+#         'unique_municipalities': unique_municipalities,
+#         'unique_areas': unique_areas,
+#         'avg_places': avg_places
+#     }
+    
+#     return kpi_dict
+
 
 
 def get_educational_areas(df=filtered_df):
-
     return [""] + sorted(df["Utbildningsområde"].dropna().unique().tolist())
 
-
 def get_municipalities(df=filtered_df, educational_area=""):
-
     if educational_area:
         available_municipalities = (
             df[df["Utbildningsområde"] == educational_area]["Kommun"]
@@ -168,26 +189,32 @@ def get_municipalities(df=filtered_df, educational_area=""):
     return [""] + sorted(available_municipalities.tolist())
 
 
-def get_schools(df=filtered_df, educational_area="", municipality=""):
 
+def get_schools(df=filtered_df, educational_area="", municipality=""):
     temp_df = df.copy()
+    
     if educational_area:
         temp_df = temp_df[temp_df["Utbildningsområde"] == educational_area]
+    
     if municipality:
         temp_df = temp_df[temp_df["Kommun"] == municipality]
-    available_schools = temp_df["Anordnare namn"].dropna().unique()
+    
+    available_schools = temp_df["Utbildningsanordnare administrativ enhet"].dropna().unique()
     return [""] + sorted(available_schools.tolist())
 
 
 def get_educations(df=filtered_df, educational_area="", municipality="", school=""):
-
     temp_df = df.copy()
+    
     if educational_area:
         temp_df = temp_df[temp_df["Utbildningsområde"] == educational_area]
+    
     if municipality:
         temp_df = temp_df[temp_df["Kommun"] == municipality]
+    
     if school:
-        temp_df = temp_df[temp_df["Anordnare namn"] == school]
+        temp_df = temp_df[temp_df["Utbildningsanordnare administrativ enhet"] == school]
+    
     available_educations = temp_df["Utbildningsnamn"].dropna().unique()
     return [""] + sorted(available_educations.tolist())
 
@@ -201,14 +228,11 @@ def apply_filters(df, educational_area="", municipality="", school="", education
     if municipality:
         temp_df = temp_df[temp_df['Kommun'] == municipality]
     if school:
-        temp_df = temp_df[temp_df['Anordnare namn'] == school]
+        temp_df = temp_df[temp_df['Utbildningsanordnare administrativ enhet'] == school]
     if education:
         temp_df = temp_df[temp_df['Utbildningsnamn'] == education]
-    
-
     if year and year != "":
-
-        temp_df = temp_df[temp_df['Utbildningsnamn'].str.contains(str(year))]
+        temp_df = temp_df[temp_df['År'] == int(year)]
     
     kpi_results = kpi(temp_df)
     
@@ -246,3 +270,5 @@ def map_processing():
     }
 
     return df_combine, df_regions, json_data, region_codes
+
+
