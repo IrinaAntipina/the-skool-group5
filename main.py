@@ -10,3 +10,4 @@ if __name__ == "__main__":
     Gui(pages=pages, css_file="assets/style.css").run(
         use_reloader=True, port=8080
     )
+

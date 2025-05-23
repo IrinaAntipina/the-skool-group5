@@ -1,6 +1,7 @@
 import taipy.gui.builder as tgb
 from backend.data_processing import (
     filtered_df,
+    df_medel,
     df_geo,
     kpi,
     get_educational_areas,
@@ -15,6 +16,8 @@ from backend.data_processing import (
 
 from .charts import (
     #prepare_pie_data,
+    filter_by_year_medel,
+    create_initial_chart_medel,
     prepare_pie_data_filtered,
     prepare_map_data,
   #  create_pie_chart,
@@ -26,6 +29,7 @@ from .charts import (
     filter_by_year,
     unique_years,
     years,
+    selected_year_medel,
     selected_year,
     on_change_year,
     create_map
@@ -36,6 +40,12 @@ from .charts import (
 initial_year_value = int(selected_year)
 initial_filtered_data = df_melted[df_melted['År'] == initial_year_value]
 categories = initial_filtered_data[category_column].unique().tolist()
+
+# initial medel chart 
+initial_year_value_medel = int(selected_year_medel)
+initial_filtered_data_medel = df_medel[df_medel['År'] == initial_year_value_medel]
+categories_medel = initial_filtered_data_medel[category_column].unique().tolist()
+
 
 # defaul values for filter
 selected_educational_area = ""
@@ -211,6 +221,7 @@ approval_rate = initial_kpi_results['approval_rate']
 # state.pie_figure = create_pie_chart_with_title(pie_data)
 
 #pie_data = prepare_pie_data(filtered_df)
+medel_figure= create_initial_chart_medel(df_medel)
 map_data = prepare_map_data(filtered_df)
 pie_data, pie_title = prepare_pie_data_filtered(filtered_df)
 pie_figure = create_pie_chart_with_title(pie_data, pie_title)
@@ -341,7 +352,6 @@ with tgb.Page() as page:
 
                     tgb.text("### Studerande per utbildningsområde", mode="md")
                     
-      
                     with tgb.part(class_name="bubble-chart-container"):
                         with tgb.part(class_name="chart-area"):
                             with tgb.part(style="width: 100%; height: 600px;"): 
@@ -366,5 +376,33 @@ with tgb.Page() as page:
                                 for i, cat in enumerate(categories):
                                     emoji = emojis[i % len(emojis)]
                                     tgb.text(f"{emoji} {cat}")
+
+                     
+                    tgb.text("### Medel", mode="md")
+                    
+                    with tgb.part(class_name="medel-chart-container"):
+                        with tgb.part(class_name="chart-area"):
+                            with tgb.part(style="width: 100%; height: 600px;"): 
+                                tgb.chart(figure="{medel_animated_figure}")
+                        
+                        with tgb.part(class_name="controls-area"):
+                            tgb.text("#### År: {selected_year}", mode="md")
+                            
+                            with tgb.part(class_name="selector-container"):
+                                tgb.text("Välj år:", style="font-weight: bold; margin-bottom: 5px;")
+                                tgb.selector(
+                                    value="{selected_year}",
+                                    lov="{years}",
+                                    on_change=filter_by_year,
+                                    dropdown=True,
+                                    width="100%"
+                                )
+                            
+                            # tgb.text("#### Utbildningsområde", mode="md")
+                            # with tgb.part(class_name="legend-list"):
+                            #     emojis = ["🔵", "🔴", "🟢", "🟣", "🟠", "🔷", "🟥", "🟩", "🟪", "🟨"]
+                            #     for i, cat in enumerate(categories):
+                            #         emoji = emojis[i % len(emojis)]
+                            #         tgb.text(f"{emoji} {cat}")
 
 dashboard_page = page
