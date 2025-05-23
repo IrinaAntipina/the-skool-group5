@@ -8,10 +8,13 @@ import json
 
 
 df = pd.read_excel(DATA_DIRECTORY / "2022-2024.xlsx")
+df_story1= pd.read_excel(DATA_DIRECTORY / "resultat-2024-for-kurser-inom-yh.xlsx")
+df_medel=pd.read_excel(DATA_DIRECTORY / "ek_1_utbet_statliga_medel_utbomr.xlsx")
+
 df_stud = pd.read_excel("data/studerande-och-examinerade-inom-smala-yrkesomraden-2014-2024.xlsx", sheet_name="studerande", skiprows=3).copy()
 
 filtered_df = df.copy()  
-df_bar_chart = df.copy()
+df_bar_chart = df_story1.copy()
 
 filtered_df_year = filtered_df.copy()
 filtered_df_year['År'] = 2024  # year by default
