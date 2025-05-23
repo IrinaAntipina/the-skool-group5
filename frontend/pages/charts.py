@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 #from utils.constants import DATA_DIRECTORY
 from assets.color_codes import SEA_GREEN, SALMON_RED, SNOW
-from backend.data_processing import df, filtered_df, df_bar_chart, df_geo, swedish_coordinates, geojson, df_melted,category_column, year_columns, apply_filters, map_processing
+from backend.data_processing import df, filtered_df, df_bar_chart, df_geo, swedish_coordinates, geojson, df_melted,category_column, year_columns, apply_filters, map_processing, df_story1
 #from frontend.pages.dashboard import apply_filters_to_dashboard
 from difflib import get_close_matches
 import numpy as np
@@ -151,98 +151,13 @@ def get_summary_stats(filtered_df):
 
 # Fredrik--------------------------------------------------
 
-# Function for creating a figure
-# def create_bar(df_bar_chart):
-#     # query to get top 10 schools
-#     top10_schools = duckdb.query(
-#         """--sql
-#     SELECT 
-#         "Anordnare namn" AS Anordnare,
-#         COUNT(*) FILTER (WHERE Beslut = 'Beviljad') AS Beviljad,
-#         COUNT(*) FILTER (WHERE Beslut = 'Avslag') AS Avslag,
-#         COUNT(*) AS Totalt
-#     FROM df_bar_chart
-#     GROUP BY Anordnare
-#     ORDER BY Totalt DESC
-#     LIMIT 10
-#     """
-#     ).df()
-
-#     # melt the bars for visualizing more than one value in each bar
-#     melted_bars = top10_schools.melt(
-#         id_vars="Anordnare",
-#         value_vars=["Beviljad", "Avslag"],
-#         var_name="Beslut",
-#         value_name="Totala ansökningar"
-#     )
-
-#     # visual bar using plotly.express
-
-#     # create graph
-#     figure = px.bar(
-#         melted_bars,
-#         x="Totala ansökningar",
-#         y="Anordnare",
-#         orientation="h",
-#         custom_data=["Totala ansökningar", "Anordnare"],
-#         color="Beslut",
-#         color_discrete_map={"Beviljad": SEA_GREEN, "Avslag": SALMON_RED},
-#     )
-
-#     # reverse the bars, remove unneccesary things and fix font
-#     figure.update_layout(
-#         title=dict(
-#             text="Bland de 10 anordnarna med flest kursansökningar år 2024<br>är vissa betydligt bättre på att få sina beviljade",
-#             font=dict(size=20, family="Arial", color=SNOW),
-#             x=0.5
-#         ),
-#         margin=dict(t=100),  # place between title and bars
-#         xaxis=dict(
-#             tickfont=dict(family="Arial", color=SNOW)
-#         ),
-#         yaxis=dict(
-#             autorange="reversed",
-#             tickfont=dict(family="Arial", color=SNOW)
-#         ),
-#         legend_title_text=None,
-#         xaxis_title=None,
-#         yaxis_title=None
-#     )
-
-#     figure.add_annotation(
-#     x=18,
-#     y="Nackademin AB",
-#     xref="x",
-#     yref="y",
-#     ax=45,
-#     ay=4,
-#     axref="x",
-#     ayref="y",
-#     showarrow=True,
-#     arrowhead=2,
-#     arrowsize=1,
-#     arrowwidth=2,
-#     arrowcolor=SNOW,
-#     text="<b>100% beviljade – en inspiration?</b>",
-#     font=dict(size=15, family="Arial"),
-# )
-
-#     # update the hover for cleaner visualization
-#     figure.update_traces(
-#         hovertemplate="<b>%{customdata[1]}</b><br>Totala ansökningar: %{customdata[0]}<extra></extra>"
-#     )
-    
-#     return figure
-
-# bar_chart = create_bar(df_bar_chart)
-
-
+#Function for creating a figure
 def create_bar(df_bar_chart):
     # query to get top 10 schools
     top10_schools = duckdb.query(
         """--sql
     SELECT 
-        "Utbildningsanordnare administrativ enhet" AS Anordnare,
+        "Anordnare namn" AS Anordnare,
         COUNT(*) FILTER (WHERE Beslut = 'Beviljad') AS Beviljad,
         COUNT(*) FILTER (WHERE Beslut = 'Avslag') AS Avslag,
         COUNT(*) AS Totalt
@@ -318,6 +233,91 @@ def create_bar(df_bar_chart):
     )
     
     return figure
+
+bar_chart = create_bar(df_story1)
+
+
+# def create_bar(df_bar_chart):
+#     # query to get top 10 schools
+#     top10_schools = duckdb.query(
+#         """--sql
+#     SELECT 
+#         "Utbildningsanordnare administrativ enhet" AS Anordnare,
+#         COUNT(*) FILTER (WHERE Beslut = 'Beviljad') AS Beviljad,
+#         COUNT(*) FILTER (WHERE Beslut = 'Avslag') AS Avslag,
+#         COUNT(*) AS Totalt
+#     FROM df_bar_chart
+#     GROUP BY Anordnare
+#     ORDER BY Totalt DESC
+#     LIMIT 10
+#     """
+#     ).df()
+
+#     # melt the bars for visualizing more than one value in each bar
+#     melted_bars = top10_schools.melt(
+#         id_vars="Anordnare",
+#         value_vars=["Beviljad", "Avslag"],
+#         var_name="Beslut",
+#         value_name="Totala ansökningar"
+#     )
+
+#     # visual bar using plotly.express
+
+#     # create graph
+#     figure = px.bar(
+#         melted_bars,
+#         x="Totala ansökningar",
+#         y="Anordnare",
+#         orientation="h",
+#         custom_data=["Totala ansökningar", "Anordnare"],
+#         color="Beslut",
+#         color_discrete_map={"Beviljad": SEA_GREEN, "Avslag": SALMON_RED},
+#     )
+
+#     # reverse the bars, remove unneccesary things and fix font
+#     figure.update_layout(
+#         title=dict(
+#             text="Bland de 10 anordnarna med flest kursansökningar år 2024<br>är vissa betydligt bättre på att få sina beviljade",
+#             font=dict(size=20, family="Arial", color=SNOW),
+#             x=0.5
+#         ),
+#         margin=dict(t=100),  # place between title and bars
+#         xaxis=dict(
+#             tickfont=dict(family="Arial", color=SNOW)
+#         ),
+#         yaxis=dict(
+#             autorange="reversed",
+#             tickfont=dict(family="Arial", color=SNOW)
+#         ),
+#         legend_title_text=None,
+#         xaxis_title=None,
+#         yaxis_title=None
+#     )
+
+#     figure.add_annotation(
+#     x=18,
+#     y="Nackademin AB",
+#     xref="x",
+#     yref="y",
+#     ax=45,
+#     ay=4,
+#     axref="x",
+#     ayref="y",
+#     showarrow=True,
+#     arrowhead=2,
+#     arrowsize=1,
+#     arrowwidth=2,
+#     arrowcolor=SNOW,
+#     text="<b>100% beviljade – en inspiration?</b>",
+#     font=dict(size=15, family="Arial"),
+# )
+
+#     # update the hover for cleaner visualization
+#     figure.update_traces(
+#         hovertemplate="<b>%{customdata[1]}</b><br>Totala ansökningar: %{customdata[0]}<extra></extra>"
+#     )
+    
+#     return figure
 
 # Jonathan ------------------------------------------------
 
@@ -446,6 +446,106 @@ def create_initial_chart():
     )
     
     return fig
+
+#  pengar chart--------------------------------------------------------------
+
+
+unique_years = sorted(df['År'].unique())
+years = [str(year) for year in unique_years]
+selected_year = years[0]
+
+def filter_by_year(state):
+    try:
+        year_value = int(state.selected_year)
+        filtered_data = df_melted[df_melted['År'] == year_value]
+        
+        if len(filtered_data) == 0:
+            fig = go.Figure()
+            fig.update_layout(
+                title=f'Inga data för år {year_value}',
+                height=600
+            )
+            state.bub_animated_figure = fig
+            state.categories = []
+            return
+        
+        fig = px.scatter(
+            filtered_data,
+            x=category_column,            
+            y='Antal',                       
+            size='Antal',                   
+            color=category_column,          
+            hover_name=category_column,      
+            size_max=50,                    
+            title="",
+            labels={'År': 'År', 'Antal': 'Antal', category_column: 'Utbildningsområde'},
+            template="plotly_white"          
+        )
+
+        fig.update_layout(
+            xaxis=dict(
+                showticklabels=False,
+                title=None
+            ),
+            yaxis=dict(
+                title='Antal'
+            ),
+
+            showlegend=False,
+            margin=dict(r=20, l=20, t=20, b=20),
+            height=600
+        )
+        
+        state.bub_animated_figure = fig
+        
+        state.categories = filtered_data[category_column].unique().tolist()
+        
+    except Exception as e:
+        print(f"Error in filter_by_year: {e}")
+        fig = go.Figure()
+        fig.update_layout(title=f"Error: {str(e)}")
+        state.bub_animated_figure = fig
+        state.categories = []
+
+
+def create_initial_chart():
+    year_value = int(selected_year)  
+    filtered_data = df_melted[df_melted['År'] == year_value]
+    
+    fig = px.scatter(
+        filtered_data,
+        x=category_column,            
+        y='Antal',                     
+        size='Antal',                  
+        color=category_column,          
+        hover_name=category_column,      
+        size_max=50,                    
+        title="",
+        labels={'År': 'År', 'Antal': 'Antal', category_column: 'Utbildningsområde'},
+        template="plotly_white"          
+    )
+
+    fig.update_layout(
+        xaxis=dict(
+            showticklabels=False,
+            title=None
+        ),
+        yaxis=dict(
+            title='Antal'
+        ),
+  
+        showlegend=False,
+        margin=dict(r=20, l=20, t=20, b=20),
+        height=600
+    )
+    
+    return fig
+
+
+
+#--------------------------------------------------------------
+
+
 
 #----------------------------------------------------------------------------------------
 # sweden map
