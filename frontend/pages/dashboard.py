@@ -3,6 +3,7 @@ from backend.data_processing import (
     filtered_df,
     df_medel,
     df_geo,
+    df_melted_medel,
     kpi,
     get_educational_areas,
     get_municipalities,
@@ -15,6 +16,8 @@ from backend.data_processing import (
 )
 
 from .charts import (
+    df_melted_medel,
+    category_column_medel, 
     #prepare_pie_data,
     filter_by_year_medel,
     create_initial_chart_medel,
@@ -43,8 +46,8 @@ categories = initial_filtered_data[category_column].unique().tolist()
 
 # initial medel chart 
 initial_year_value_medel = int(selected_year_medel)
-initial_filtered_data_medel = df_medel[df_medel['År'] == initial_year_value_medel]
-categories_medel = initial_filtered_data_medel[category_column].unique().tolist()
+initial_filtered_data_medel = df_melted_medel[df_melted_medel['År'] == initial_year_value_medel]
+categories_medel = initial_filtered_data_medel[category_column_medel].unique().tolist()
 
 
 # defaul values for filter
@@ -221,7 +224,9 @@ approval_rate = initial_kpi_results['approval_rate']
 # state.pie_figure = create_pie_chart_with_title(pie_data)
 
 #pie_data = prepare_pie_data(filtered_df)
-medel_figure= create_initial_chart_medel(df_medel)
+
+medel_figure = create_initial_chart_medel()
+medel_animated_figure = create_initial_chart_medel()
 map_data = prepare_map_data(filtered_df)
 pie_data, pie_title = prepare_pie_data_filtered(filtered_df)
 pie_figure = create_pie_chart_with_title(pie_data, pie_title)
@@ -334,7 +339,7 @@ with tgb.Page() as page:
                         
   
                         with tgb.part(class_name="map-card"):
-                            tgb.text("### Geografisk fördelning", mode="md")
+                            tgb.text("### Geografisk fördelning (2022-2024)", mode="md")
                             with tgb.part(style="width: 100%; height: 500px;"): 
                                 tgb.selector(
                                     value="{selected_year}",
@@ -358,7 +363,7 @@ with tgb.Page() as page:
                                 tgb.chart(figure="{bub_animated_figure}")
                         
                         with tgb.part(class_name="controls-area"):
-                            tgb.text("#### År: {selected_year}", mode="md")
+                           # tgb.text("#### År: {selected_year}", mode="md")
                             
                             with tgb.part(class_name="selector-container"):
                                 tgb.text("Välj år:", style="font-weight: bold; margin-bottom: 5px;")
@@ -386,23 +391,24 @@ with tgb.Page() as page:
                                 tgb.chart(figure="{medel_animated_figure}")
                         
                         with tgb.part(class_name="controls-area"):
-                            tgb.text("#### År: {selected_year}", mode="md")
+                          #  tgb.text("#### År: {selected_year}", mode="md")
                             
                             with tgb.part(class_name="selector-container"):
                                 tgb.text("Välj år:", style="font-weight: bold; margin-bottom: 5px;")
                                 tgb.selector(
                                     value="{selected_year}",
                                     lov="{years}",
-                                    on_change=filter_by_year,
+                                    on_change=filter_by_year_medel,
                                     dropdown=True,
                                     width="100%"
                                 )
                             
-                            # tgb.text("#### Utbildningsområde", mode="md")
-                            # with tgb.part(class_name="legend-list"):
-                            #     emojis = ["🔵", "🔴", "🟢", "🟣", "🟠", "🔷", "🟥", "🟩", "🟪", "🟨"]
-                            #     for i, cat in enumerate(categories):
-                            #         emoji = emojis[i % len(emojis)]
-                            #         tgb.text(f"{emoji} {cat}")
+                            tgb.text("#### Utbildningsområde", mode="md")
+                            with tgb.part(class_name="legend-list"):
+                              
+                                emojis = ["🔵", "🔴", "🟢", "🟣", "🟠", "🔷", "🟥", "🟩", "🟪", "🟨"]
+                                for i, cat in enumerate(categories_medel):
+                                    emoji = emojis[i % len(emojis)]
+                                    tgb.text(f"{emoji} {cat}")
 
 dashboard_page = page

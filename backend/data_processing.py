@@ -11,7 +11,7 @@ df = pd.read_excel(DATA_DIRECTORY / "2022-2024.xlsx")
 df_story1= pd.read_excel(DATA_DIRECTORY / "resultat-2024-for-kurser-inom-yh.xlsx")
 df_medel=pd.read_excel(DATA_DIRECTORY / "ek_1_utbet_statliga_medel_utbomr.xlsx", sheet_name="Utbetalda statliga medel", skiprows=5).copy()
 
-df_stud = pd.read_excel("data/studerande-och-examinerade-inom-smala-yrkesomraden-2014-2024.xlsx", sheet_name="studerande", skiprows=3).copy()
+df_stud = pd.read_excel(DATA_DIRECTORY / "studerande-och-examinerade-inom-smala-yrkesomraden-2014-2024.xlsx", sheet_name="studerande", skiprows=3).copy()
 
 filtered_df = df.copy()  
 df_bar_chart = df_story1.copy()
@@ -32,7 +32,22 @@ df_melted = df_stud.melt(
     value_name='Antal'          
 )
 
+# Удаляем строку с 'Totalt'
 df_melted = df_melted[df_melted[category_column] != 'Totalt']
+
+# ВАЖНО: Преобразуем колонку 'År' в числовой формат
+# Сначала попробуем извлечь год из строки (если это строка вида '2014' или 'År 2014')
+df_melted['År'] = df_melted['År'].astype(str).str.extract(r'(\d{4})', expand=False)
+# Преобразуем в числовой формат
+df_melted['År'] = pd.to_numeric(df_melted['År'], errors='coerce')
+# Удаляем строки где не удалось извлечь год
+df_melted = df_melted.dropna(subset=['År'])
+# Преобразуем в int
+df_melted['År'] = df_melted['År'].astype(int)
+
+# Также убедимся что 'Antal' - числовой
+df_melted['Antal'] = pd.to_numeric(df_melted['Antal'], errors='coerce')
+df_melted = df_melted.dropna(subset=['Antal'])
 
 
 #----for medel chart
@@ -46,7 +61,22 @@ df_melted_medel = df_medel.melt(
     value_name='Antal'          
 )
 
+# Удаляем строку с 'Totalt'
 df_melted_medel = df_melted_medel[df_melted_medel[category_column_medel] != 'Totalt']
+
+# ВАЖНО: Преобразуем колонку 'År' в числовой формат
+# Сначала попробуем извлечь год из строки (если это строка вида '2014' или 'År 2014')
+df_melted_medel['År'] = df_melted_medel['År'].astype(str).str.extract(r'(\d{4})', expand=False)
+# Преобразуем в числовой формат
+df_melted_medel['År'] = pd.to_numeric(df_melted_medel['År'], errors='coerce')
+# Удаляем строки где не удалось извлечь год
+df_melted_medel = df_melted_medel.dropna(subset=['År'])
+# Преобразуем в int
+df_melted_medel['År'] = df_melted_medel['År'].astype(int)
+
+# Также убедимся что 'Antal' - числовой
+df_melted_medel['Antal'] = pd.to_numeric(df_melted_medel['Antal'], errors='coerce')
+df_melted_medel = df_melted_medel.dropna(subset=['Antal'])
 #---------
 
 pio.renderers.default = "browser"

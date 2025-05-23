@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 #from utils.constants import DATA_DIRECTORY
 from assets.color_codes import SEA_GREEN, SALMON_RED, SNOW
-from backend.data_processing import df_stud, df_melted_medel, df, filtered_df, df_bar_chart, df_geo, swedish_coordinates, geojson, df_melted,category_column, category_column_medel, year_columns, apply_filters, map_processing, df_story1
+from backend.data_processing import df_melted_medel, df, filtered_df, df_bar_chart, df_geo, swedish_coordinates, geojson, df_melted,category_column, category_column_medel, year_columns, apply_filters, map_processing, df_story1
 #from frontend.pages.dashboard import apply_filters_to_dashboard
 from difflib import get_close_matches
 import numpy as np
@@ -356,7 +356,7 @@ def geo_chart(df_geo):
 # bubbles chart---------------------------------------------------------
 
 
-unique_years = sorted(df_stud['År'].unique())
+unique_years = sorted(df_melted['År'].unique())
 years = [str(year) for year in unique_years]
 selected_year = years[0]
 
@@ -508,9 +508,9 @@ def filter_by_year_medel(state):
         state.categories_medel = []
 
 
-def create_initial_chart_medel():
+def create_initial_chart_medel():  
     year_value = int(selected_year_medel)  
-    filtered_data = df_melted_medel[df_melted_medel['År'] == year_value]
+    filtered_data = df_melted_medel[df_melted_medel['År'] == year_value] 
     
     fig = px.scatter(
         filtered_data,
