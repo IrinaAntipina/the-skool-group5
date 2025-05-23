@@ -9,7 +9,7 @@ import json
 
 df = pd.read_excel(DATA_DIRECTORY / "2022-2024.xlsx")
 df_story1= pd.read_excel(DATA_DIRECTORY / "resultat-2024-for-kurser-inom-yh.xlsx")
-df_medel=pd.read_excel(DATA_DIRECTORY / "ek_1_utbet_statliga_medel_utbomr.xlsx")
+df_medel=pd.read_excel(DATA_DIRECTORY / "ek_1_utbet_statliga_medel_utbomr.xlsx", sheet_name="Utbetalda statliga medel", skiprows=5).copy()
 
 df_stud = pd.read_excel("data/studerande-och-examinerade-inom-smala-yrkesomraden-2014-2024.xlsx", sheet_name="studerande", skiprows=3).copy()
 
@@ -30,9 +30,23 @@ df_melted = df_stud.melt(
     value_vars=year_columns,    
     var_name='År',              
     value_name='Antal'          
-    )
+)
 
 df_melted = df_melted[df_melted[category_column] != 'Totalt']
+
+
+#----for medel chart
+category_column_medel = df_medel.columns[0]
+year_columns_medel = df_medel.columns[1:]
+
+df_melted_medel = df_medel.melt(
+    id_vars=[category_column_medel],  
+    value_vars=year_columns_medel,   
+    var_name='År',              
+    value_name='Antal'          
+)
+
+df_melted_medel = df_melted_medel[df_melted_medel[category_column_medel] != 'Totalt']
 #---------
 
 pio.renderers.default = "browser"

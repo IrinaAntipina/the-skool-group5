@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 #from utils.constants import DATA_DIRECTORY
 from assets.color_codes import SEA_GREEN, SALMON_RED, SNOW
-from backend.data_processing import df, filtered_df, df_bar_chart, df_geo, swedish_coordinates, geojson, df_melted,category_column, year_columns, apply_filters, map_processing, df_story1
+from backend.data_processing import df_stud, df_melted_medel, df, filtered_df, df_bar_chart, df_geo, swedish_coordinates, geojson, df_melted,category_column, category_column_medel, year_columns, apply_filters, map_processing, df_story1
 #from frontend.pages.dashboard import apply_filters_to_dashboard
 from difflib import get_close_matches
 import numpy as np
@@ -356,7 +356,7 @@ def geo_chart(df_geo):
 # bubbles chart---------------------------------------------------------
 
 
-unique_years = sorted(df['År'].unique())
+unique_years = sorted(df_stud['År'].unique())
 years = [str(year) for year in unique_years]
 selected_year = years[0]
 
@@ -447,17 +447,17 @@ def create_initial_chart():
     
     return fig
 
-#  pengar chart--------------------------------------------------------------
+#  medel chart--------------------------------------------------------------
 
 
-unique_years = sorted(df['År'].unique())
-years = [str(year) for year in unique_years]
-selected_year = years[0]
+unique_years_medel = sorted(df_melted_medel['År'].unique())
+years_medel = [str(year) for year in unique_years_medel]
+selected_year_medel = years_medel[0]
 
-def filter_by_year(state):
+def filter_by_year_medel(state):
     try:
         year_value = int(state.selected_year)
-        filtered_data = df_melted[df_melted['År'] == year_value]
+        filtered_data = df_melted_medel[df_melted_medel['År'] == year_value]
         
         if len(filtered_data) == 0:
             fig = go.Figure()
@@ -465,20 +465,20 @@ def filter_by_year(state):
                 title=f'Inga data för år {year_value}',
                 height=600
             )
-            state.bub_animated_figure = fig
-            state.categories = []
+            state.medel_animated_figure = fig
+            state.categories_medel = []  
             return
         
         fig = px.scatter(
             filtered_data,
-            x=category_column,            
+            x=category_column_medel,  
             y='Antal',                       
             size='Antal',                   
-            color=category_column,          
-            hover_name=category_column,      
+            color=category_column_medel,  
+            hover_name=category_column_medel,  
             size_max=50,                    
             title="",
-            labels={'År': 'År', 'Antal': 'Antal', category_column: 'Utbildningsområde'},
+            labels={'År': 'År', 'Antal': 'Antal', category_column_medel: 'Utbildningsområde'},
             template="plotly_white"          
         )
 
@@ -496,32 +496,32 @@ def filter_by_year(state):
             height=600
         )
         
-        state.bub_animated_figure = fig
+        state.medel_animated_figure = fig
         
-        state.categories = filtered_data[category_column].unique().tolist()
+        state.categories_medel = filtered_data[category_column_medel].unique().tolist()
         
     except Exception as e:
-        print(f"Error in filter_by_year: {e}")
+        print(f"Error in filter_by_year_medel: {e}")
         fig = go.Figure()
         fig.update_layout(title=f"Error: {str(e)}")
-        state.bub_animated_figure = fig
-        state.categories = []
+        state.medel_animated_figure = fig
+        state.categories_medel = []
 
 
-def create_initial_chart():
-    year_value = int(selected_year)  
-    filtered_data = df_melted[df_melted['År'] == year_value]
+def create_initial_chart_medel():
+    year_value = int(selected_year_medel)  
+    filtered_data = df_melted_medel[df_melted_medel['År'] == year_value]
     
     fig = px.scatter(
         filtered_data,
-        x=category_column,            
+        x=category_column_medel,  
         y='Antal',                     
         size='Antal',                  
-        color=category_column,          
-        hover_name=category_column,      
+        color=category_column_medel,  
+        hover_name=category_column_medel, 
         size_max=50,                    
         title="",
-        labels={'År': 'År', 'Antal': 'Antal', category_column: 'Utbildningsområde'},
+        labels={'År': 'År', 'Antal': 'Antal', category_column_medel: 'Utbildningsområde'},
         template="plotly_white"          
     )
 
@@ -543,7 +543,6 @@ def create_initial_chart():
 
 
 
-#--------------------------------------------------------------
 
 
 
