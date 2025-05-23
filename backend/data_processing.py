@@ -271,4 +271,13 @@ def map_processing():
 
     return df_combine, df_regions, json_data, region_codes
 
+#-------------------------------------------------------------------------------------------
+# storytelling money
 
+def money_processing(df_year):
+    df.columns = df.columns.astype(str)
+
+    year = "2024"
+    df_year = df[["Utbildningsområde", year]].dropna()
+    df_year = df_year.sort_values(by=year, ascending=True)
+    return df_year
