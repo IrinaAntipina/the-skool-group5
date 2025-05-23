@@ -212,3 +212,27 @@
   margin: 6px 0;
   font-size: 0.9rem;
 }
+
+.medel-chart-container {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  width: 100%; 
+}
+
+
+.bubble-chart-container,
+.medel-chart-container {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  width: 100%; 
+}
+
+
+@media (max-width: 992px) {
+  .bubble-chart-container,
+  .medel-chart-container {
+    flex-direction: column;
+  }
+}
