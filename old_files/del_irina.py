@@ -192,3 +192,133 @@ if __name__ == "__main__":
         print(f"{key}: {value}")
     
     print("\nAll functions tested successfully!")
+
+
+
+
+
+# prepare_map_data
+# map_data = prepare_map_data(filtered_df)
+
+# def prepare_map_data(filtered_df):
+
+#     result_df = filtered_df[filtered_df['Beslut'] == 'Beviljad'].copy()
+#     result_df['Kommun'] = result_df['Kommun'].replace('Se "Lista flera kommuner"', 'Flera kommuner')
+#     kommun_stats = result_df.groupby('Kommun')['Beviljade platser totalt'].sum().reset_index()
+#     kommun_stats.columns = ['Kommun', 'Antal_platser']
+#     if swedish_coordinates:
+#         kommun_stats['lat'] = kommun_stats['Kommun'].map(lambda x: swedish_coordinates.get(x, {}).get('lat'))
+#         kommun_stats['lon'] = kommun_stats['Kommun'].map(lambda x: swedish_coordinates.get(x, {}).get('lon')) 
+
+#     return kommun_stats
+
+
+# def prepare_pie_data(filtered_df):
+
+#     result_df = filtered_df[filtered_df['Beslut'] == 'Beviljad']
+#     area_stats = result_df.groupby('Utbildningsområde')['Antal beviljade platser start 2024'].sum().sort_values(ascending=False)
+    
+#     return area_stats
+
+# def create_additional_chart(fitered_df, chart_type="bar"):
+
+#     if chart_type == "bar" and len(filtered_df) > 0:
+#         result_df = filtered_df[filtered_df['Beslut'] == 'Beviljad']
+#         school_stats = result_df.groupby('Utbildningsanordnare administrativ enhet')['Beviljade platser totalt'].sum().sort_values(ascending=False).head(10)
+        
+#         fig = px.bar(
+#             x=school_stats.values,
+#             y=school_stats.index,
+#             orientation='h',
+#             title='Top 10 skolor med flest beviljade platser',
+#             labels={'x': 'Antal platser', 'y': 'Skola'}
+#         )
+#         fig.update_layout(
+#             plot_bgcolor="white",
+#             margin=dict(t=50, l=150, r=30, b=50),
+#             yaxis={'categoryorder': 'total ascending'},
+#             height=400,
+#             font=dict(size=11)
+#         )
+#         return fig
+    
+#     return go.Figure()
+
+# def kpi(filtered_df):
+
+#     import duckdb
+    
+#     total_ans = duckdb.query(
+#         """--sql
+#     SELECT 
+#         "Anordnare namn" AS Anordnare,
+#         COUNT(*) FILTER (WHERE Beslut = 'Beviljad') AS Beviljad,
+#         COUNT(*) FILTER (WHERE Beslut = 'Avslag') AS Avslag,
+#         COUNT(*) AS Totalt
+#     FROM filtered_df 
+#     GROUP BY Anordnare
+#     ORDER BY Totalt DESC
+#     """
+#     ).df()
+
+#     bevil_platser = duckdb.query(
+#         """--sql
+#         SELECT
+#             "Anordnare namn" AS Anordnare,
+#             COUNT(*) FILTER (WHERE Beslut = 'Beviljad') AS Beviljad
+#         FROM filtered_df
+#         GROUP BY Anordnare
+#     """
+#     ).df()
+
+#     anordnare = duckdb.query(
+#         """--sql
+#         SELECT
+#             "Anordnare namn" AS Anordnare,
+#             COUNT(*) AS Totalt
+#         FROM filtered_df
+#         GROUP BY Anordnare
+#         ORDER BY Totalt DESC
+#     """
+#     ).df()
+
+#     bevil_procent = duckdb.query(
+#         """--sql
+#         SELECT 
+#             "Anordnare namn" AS Anordnare,
+#             COUNT(*) FILTER (WHERE Beslut = 'Beviljad') AS Beviljad,
+#             COUNT(*) FILTER (WHERE Beslut = 'Avslag') AS Avslag,
+#             COUNT(*) AS Totalt,
+#             CAST(COUNT(*) FILTER (WHERE Beslut = 'Beviljad') AS FLOAT) / COUNT(*) * 100 AS Procent
+#         FROM filtered_df 
+#         GROUP BY Anordnare
+#         ORDER BY Totalt DESC
+#     """
+#     ).df()
+    
+#     total_applications = len(filtered_df)
+#     approved_applications = len(filtered_df[filtered_df['Beslut'] == 'Beviljad'])
+#     total_approved_places = filtered_df[filtered_df['Beslut'] == 'Beviljad']['Antal beviljade platser start 2024'].sum()
+#     approval_rate = approved_applications / total_applications * 100 if total_applications > 0 else 0
+#     unique_schools = filtered_df['Anordnare namn'].nunique()
+#     unique_municipalities = filtered_df['Kommun'].nunique()
+#     unique_areas = filtered_df['Utbildningsområde'].nunique()
+
+#     avg_places = total_approved_places / approved_applications if approved_applications > 0 else 0
+    
+#     kpi_dict = {
+#         'total_ans': total_ans,
+#         'bevil_platser': bevil_platser,
+#         'anordnare': anordnare,
+#         'bevil_procent': bevil_procent,
+#         'total_applications': total_applications,
+#         'approved_applications': approved_applications,
+#         'total_approved_places': total_approved_places,
+#         'approval_rate': approval_rate,
+#         'unique_schools': unique_schools,
+#         'unique_municipalities': unique_municipalities,
+#         'unique_areas': unique_areas,
+#         'avg_places': avg_places
+#     }
+    
+#     return kpi_dict

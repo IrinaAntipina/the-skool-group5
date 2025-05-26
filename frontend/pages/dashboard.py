@@ -1,8 +1,6 @@
 import taipy.gui.builder as tgb
 from backend.data_processing import (
     filtered_df,
-    df_medel,
-    df_geo,
     df_melted_medel,
     kpi,
     get_educational_areas,
@@ -18,16 +16,10 @@ from backend.data_processing import (
 from .charts import (
     df_melted_medel,
     category_column_medel, 
-    #prepare_pie_data,
     filter_by_year_medel,
     create_initial_chart_medel,
     prepare_pie_data_filtered,
-    prepare_map_data,
-  #  create_pie_chart,
     create_pie_chart_with_title,
-    get_summary_stats,
-    #create_additional_chart,
-    geo_chart,
     create_initial_chart,
     filter_by_year,
     unique_years,
@@ -158,32 +150,6 @@ def on_change_school(state):
         state.selected_municipality, 
         state.selected_school
     )
-    
-
-
-# def on_change_school(state):
-
-#     state.educations = get_educations(
-#         filtered_df, 
-#         state.selected_educational_area, 
-#         state.selected_municipality, 
-#         state.selected_school
-#     )
-    
-#     # filters values to default
-#     state.selected_education = ""
-
-#      # apply current filter
-#     filtered_result = apply_filters(
-#         filtered_df, 
-#         state.selected_educational_area,
-#         "", "", ""
-#     )
-#     filtered_df_local = filtered_result[0]
-    
-#     # update pie
-#     pie_data, pie_title = prepare_pie_data_filtered(filtered_df_local)
-#     state.pie_figure = create_pie_chart_with_title(pie_data, pie_title)
 
 
 def on_change_year(state):
@@ -217,22 +183,13 @@ total_approved_places = initial_kpi_results['total_approved_places']
 unique_schools = initial_kpi_results['unique_schools']
 approval_rate = initial_kpi_results['approval_rate']
 
-# pie_data, pie_title = prepare_pie_data_filtered(filtered_df, selected_year)
-# pie_figure = create_pie_chart_with_title(pie_data, pie_title)
-
-# pie_data = prepare_pie_data_filtered(filtered_df_local)
-# state.pie_figure = create_pie_chart_with_title(pie_data)
-
-#pie_data = prepare_pie_data(filtered_df)
-
 medel_figure = create_initial_chart_medel()
 medel_animated_figure = create_initial_chart_medel()
-map_data = prepare_map_data(filtered_df)
+
 pie_data, pie_title = prepare_pie_data_filtered(filtered_df)
 pie_figure = create_pie_chart_with_title(pie_data, pie_title)
-geo_figure = geo_chart(df_geo)
+
 bub_animated_figure = create_initial_chart()
-#schools_chart = create_additional_chart(filtered_df)
 
 #------------------------------------
 # Sweden map
