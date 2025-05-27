@@ -33,14 +33,11 @@ from .charts import (
 
 map_figure = None
 
-#selected_year_kpi_pie = selected_year
 selected_year_kpi_pie = "2024"
 selected_year_map = selected_year
 years_map = ["2022", "2023", "2024"]  
 years_kpi_pie = ["2023", "2024"] 
 selected_year_map = "2024"  
-# selected_year_students = selected_year 
-# selected_year_medel = selected_year_medel 
 selected_year_students = "2024"
 selected_year_medel = "2024"
 
@@ -109,6 +106,7 @@ def update_filter_lists(state):
 
 def on_change_year_kpi_pie(state):
     apply_filters_to_dashboard(state)
+    update_filter_lists(state) 
 
 
 def reset_filters(state):
@@ -126,7 +124,6 @@ def reset_filters(state):
     kpi_results = kpi(filtered_df)
     
     
-
 def on_change_educational_area(state):
     state.selected_municipality = ""
     state.selected_school = ""
@@ -169,21 +166,35 @@ def on_change_year_students(state):
         
         sorted_data = filtered_data.sort_values('Antal', ascending=True)
 
-       
-
-
         fig = px.bar(
             sorted_data,
             x='Antal',
             y=category_column,
             orientation='h',
             color='Antal',
-            color_continuous_scale='Viridis',
+            color_continuous_scale=[[0, 'rgb(0,50,25)'], [1, 'rgb(0,100,50)']],
             title="",
             labels={'Antal': 'Antal studerande', category_column: 'Utbildningsområde'},
-            text=category_column  
+            text=None  
         )
-        
+
+        fig.update_layout(coloraxis_showscale=False)
+
+        min_value = sorted_data['Antal'].min()
+        offset = min_value * 0.02
+
+        for i, row in sorted_data.iterrows():
+            fig.add_annotation(
+                x=offset, 
+                y=row[category_column],
+                text=row[category_column],
+                showarrow=False,
+                font=dict(size=14, color="white", family="Arial Black"),
+                bgcolor=None,
+                borderwidth=0,
+                xanchor="left"  
+            )
+
         fig.update_layout(
             showlegend=False,
             margin=dict(r=20, l=20, t=20, b=20),
@@ -192,13 +203,14 @@ def on_change_year_students(state):
                 title=None,
                 showticklabels=False 
             ),
-            xaxis=dict(title='Antal studerande')
+            xaxis=dict(title=None)
         )
         
         fig.update_traces(
-            textposition='inside',
-            textfont_size=10,
-            textfont_color='white'
+            textposition=None,
+            textfont_size=None,
+            textfont_color=None,
+            text=None
         )
         
         state.bub_animated_figure = fig
@@ -226,7 +238,6 @@ def on_change_year_medel(state):
             state.categories_medel = []  
             return
         
-       
         
         sorted_data = filtered_data.sort_values('Antal', ascending=True)
         
@@ -236,11 +247,30 @@ def on_change_year_medel(state):
             y=category_column_medel,
             orientation='h',
             color='Antal',
-            color_continuous_scale='Plasma',
+            color_continuous_scale=[[0, 'rgb(120,0,0)'], [1, 'rgb(200,20,20)']],
             title="",
             labels={'Antal': 'Antal (medel)', category_column_medel: 'Utbildningsområde'},
-            text=category_column_medel 
+            text=None
         )
+
+        fig.update_layout(coloraxis_showscale=False)
+
+        min_value = sorted_data['Antal'].min()
+        offset = min_value * 0.02
+
+        for i, row in sorted_data.iterrows():
+            fig.add_annotation(
+                x=offset,
+                y=row[category_column_medel],
+                text=row[category_column_medel],
+                showarrow=False,
+                font=dict(size=14, color="white", family="Arial Black"),
+                bgcolor=None, 
+                bordercolor=None,
+                borderwidth=0,
+                xanchor="left"
+              
+            )
         
         fig.update_layout(
             showlegend=False,
@@ -254,9 +284,10 @@ def on_change_year_medel(state):
         )
         
         fig.update_traces(
-            textposition='inside',
-            textfont_size=10,
-            textfont_color='white'
+            textposition=None,
+            textfont_size=None,
+            textfont_color=None,
+            text=None
         )
 
         state.medel_animated_figure = fig
@@ -288,21 +319,44 @@ medel_animated_figure = px.bar(
     y=category_column_medel,
     orientation='h',
     color='Antal',
-    color_continuous_scale='Plasma',
+    color_continuous_scale=[[0, 'rgb(120,0,0)'], [1, 'rgb(200,20,20)']],
     title="",
     labels={'Antal': 'Antal (medel)', category_column_medel: 'Utbildningsområde'},
-    text=category_column_medel
-).update_layout(
+    text=None  
+)
+
+sorted_initial_medel = initial_filtered_data_medel.sort_values('Antal', ascending=True)
+min_value_initial = sorted_initial_medel['Antal'].min()
+offset_initial = min_value_initial * 0.02
+
+for i, row in sorted_initial_medel.iterrows():
+    medel_animated_figure.add_annotation(
+        x=offset_initial,
+        y=row[category_column_medel],
+        text=row[category_column_medel],
+        showarrow=False,
+        font=dict(size=14, color="white", family="Arial Black"),
+        bgcolor=None,
+        borderwidth=0,
+        xanchor="left" 
+
+    )
+
+medel_animated_figure.update_layout(
     showlegend=False,
     margin=dict(r=20, l=20, t=20, b=20),
     height=600,
     yaxis=dict(title=None, showticklabels=False),
-    xaxis=dict(title='Antal (medel)')
+    xaxis=dict(title=None),
+    coloraxis_showscale=False 
 ).update_traces(
-    textposition='inside',
-    textfont_size=10,
-    textfont_color='white'
+    textposition=None,
+    textfont_size=None,
+    textfont_color=None,
+    text=None
 )
+
+
 
 pie_data, pie_title = prepare_pie_data_filtered(filtered_df)
 pie_figure = create_pie_chart_with_title(pie_data, pie_title)
@@ -315,10 +369,10 @@ bub_animated_figure = px.bar(
     y=category_column,
     orientation='h',
     color='Antal',
-    color_continuous_scale='Viridis',
+    color_continuous_scale=[[0, 'rgb(0,50,25)'], [1, 'rgb(0,100,50)']],
     title="",
     labels={'Antal': 'Antal studerande', category_column: 'Utbildningsområde'},
-    text=category_column 
+    text=None 
 )
 
 bub_animated_figure.update_layout(
@@ -326,13 +380,42 @@ bub_animated_figure.update_layout(
     margin=dict(r=20, l=20, t=20, b=20),
     height=600,
     yaxis=dict(title=None, showticklabels=False),
-    xaxis=dict(title='Antal studerande')
+    xaxis=dict(title=None),
+    coloraxis_showscale=False 
 )
 
+min_value_students = sorted_initial_data['Antal'].min()
+offset_students = min_value_students * 0.02
+
+for i, row in sorted_initial_data.iterrows():
+    bub_animated_figure.add_annotation(
+        x=offset_students,  
+        y=row[category_column],
+        text=row[category_column],
+        showarrow=False,
+        font=dict(size=14, color="white", family="Arial Black"),
+        bgcolor=None,
+        borderwidth=0,
+        xanchor="left"  
+    )
+
+bub_animated_figure.update_layout(
+    showlegend=False,
+    margin=dict(r=20, l=20, t=20, b=20),
+    height=600,
+    yaxis=dict(title=None, showticklabels=False),
+    xaxis=dict(title=None)
+)
+
+
 bub_animated_figure.update_traces(
-    textposition='inside',
-    textfont_size=10,
-    textfont_color='white'
+    # textposition='inside',
+    # textfont_size=10,
+    # textfont_color='white'
+    textposition=None,
+    textfont_size=None,
+    textfont_color=None,
+    text=None
 )
 
 #------------------------------------
@@ -368,7 +451,7 @@ with tgb.Page() as page:
                                 lov="{educational_areas}",
                                 label="Välj utbildningsområde",
                                 dropdown=True,
-                              #  on_change=on_change_educational_area
+                               # on_change=on_change_educational_area
                             )
 
                             tgb.selector(
@@ -429,8 +512,7 @@ with tgb.Page() as page:
                             tgb.text(f"**Antal anordnare:** {{unique_schools}}", mode="md", class_name="kpi-value")
                             
                             tgb.text("*Värdena uppdateras baserat på valda filter*", mode="md", class_name="filter-note")
-
-
+                
        
             with tgb.part(class_name="middle-column"):
                 with tgb.part(class_name="middle-section"):
@@ -440,6 +522,7 @@ with tgb.Page() as page:
                             tgb.text("### Fördelning av beviljade platser", mode="md")
                             with tgb.part(style="width: 100%; height: 500px;"): 
                                 tgb.chart(figure="{pie_figure}")
+                            tgb.text("*Om diagrammet visar 'Inga data', prova att välja annat år eller färre filter*", mode="md", class_name="filter-note")
                         
   
                         with tgb.part(class_name="map-card"):
