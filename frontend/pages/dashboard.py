@@ -1,4 +1,6 @@
 import taipy.gui.builder as tgb
+import plotly.express as px
+import plotly.graph_objects as go
 from backend.data_processing import (
     filtered_df,
     df_melted_medel,
@@ -14,25 +16,36 @@ from backend.data_processing import (
 )
 
 from .charts import (
-    df_melted_medel,
     category_column_medel, 
-    filter_by_year_medel,
     create_initial_chart_medel,
     prepare_pie_data_filtered,
     create_pie_chart_with_title,
     create_initial_chart,
-    filter_by_year,
     unique_years,
     years,
+    unique_years_medel,
+    years_medel,
     selected_year_medel,
     selected_year,
-    on_change_year,
     create_map
 
 )
 
-# initial bubble chart 
-initial_year_value = int(selected_year)
+map_figure = None
+
+#selected_year_kpi_pie = selected_year
+selected_year_kpi_pie = "2024"
+selected_year_map = selected_year
+years_map = ["2022", "2023", "2024"]  
+years_kpi_pie = ["2023", "2024"] 
+selected_year_map = "2024"  
+# selected_year_students = selected_year 
+# selected_year_medel = selected_year_medel 
+selected_year_students = "2024"
+selected_year_medel = "2024"
+
+# initial students chart 
+initial_year_value = int(selected_year_students)
 initial_filtered_data = df_melted[df_melted['År'] == initial_year_value]
 categories = initial_filtered_data[category_column].unique().tolist()
 
@@ -54,6 +67,8 @@ municipalities = get_municipalities()
 schools = get_schools()
 educations = get_educations()
 
+selected_year_students = str(selected_year_students)
+selected_year_medel = str(selected_year_medel)
 
 def apply_filters_to_dashboard(state):
     filtered_result = apply_filters(
@@ -62,7 +77,7 @@ def apply_filters_to_dashboard(state):
         state.selected_municipality,
         state.selected_school,
         state.selected_education,
-        state.selected_year  
+        state.selected_year_kpi_pie  
     )
     
     filtered_df_local = filtered_result[0]  
@@ -80,9 +95,20 @@ def apply_filters_to_dashboard(state):
     pie_data, pie_title = prepare_pie_data_filtered(filtered_df_local)
     state.pie_figure = create_pie_chart_with_title(pie_data, pie_title)
     
-    # update map
-    state.map_figure = create_map(int(state.selected_year))
 
+def update_filter_lists(state):
+    
+    state.municipalities = get_municipalities(filtered_df, state.selected_educational_area)  
+    state.schools = get_schools(filtered_df, state.selected_educational_area, state.selected_municipality)
+    state.educations = get_educations(
+        filtered_df, 
+        state.selected_educational_area, 
+        state.selected_municipality, 
+        state.selected_school
+    )
+
+def on_change_year_kpi_pie(state):
+    apply_filters_to_dashboard(state)
 
 
 def reset_filters(state):
@@ -96,83 +122,153 @@ def reset_filters(state):
     state.schools = get_schools()
     state.educations = get_educations()
     
+    apply_filters_to_dashboard(state)
     kpi_results = kpi(filtered_df)
     
-    # update KPI
-    state.total_applications = kpi_results['total_applications']
-    state.approved_applications = kpi_results['approved_applications']
-    state.rejected_applications = kpi_results['total_applications'] - kpi_results['approved_applications']
-    state.total_approved_places = kpi_results['total_approved_places']
-    state.unique_schools = kpi_results['unique_schools']
-    state.approval_rate = kpi_results['approval_rate']
     
-    # pie to default
-    pie_data, pie_title = prepare_pie_data_filtered(filtered_df)
-    state.pie_figure = create_pie_chart_with_title(pie_data, pie_title)
-
-
 
 def on_change_educational_area(state):
-    state.municipalities = get_municipalities(filtered_df, state.selected_educational_area)
-    state.schools = get_schools(filtered_df, state.selected_educational_area, "")
-    state.educations = get_educations(filtered_df, state.selected_educational_area, "", "")
-    
-    # Resetting the selected values ​​of dependent filters
     state.selected_municipality = ""
     state.selected_school = ""
     state.selected_education = ""
+    update_filter_lists(state)
+    apply_filters_to_dashboard(state) 
 
 
 def on_change_municipality(state):
-    state.schools = get_schools(
-        filtered_df, 
-        state.selected_educational_area, 
-        state.selected_municipality
-    )
-
-    state.educations = get_educations(
-        filtered_df, 
-        state.selected_educational_area, 
-        state.selected_municipality, 
-        ""
-    )
-    
-    # Resetting the selected values ​​of dependent filters
     state.selected_school = ""
     state.selected_education = ""
-
-
+    update_filter_lists(state)
+    apply_filters_to_dashboard(state)
 
 def on_change_school(state):
-    state.educations = get_educations(
-        filtered_df, 
-        state.selected_educational_area, 
-        state.selected_municipality, 
-        state.selected_school
-    )
-
-
-def on_change_year(state):
-    # apply curent filter with year
-    filtered_result = apply_filters(
-        filtered_df, 
-        state.selected_educational_area,
-        state.selected_municipality,
-        state.selected_school,
-        state.selected_education
-    )
-    
-    filtered_df_local = filtered_result[0]
-    
-    # update pie
-
-    pie_data = prepare_pie_data_filtered(filtered_df_local)
-    state.pie_figure = create_pie_chart_with_title(pie_data, title=pie_title)
+    state.selected_education = ""
+    update_filter_lists(state)
+    apply_filters_to_dashboard(state)
 
 
 
-def on_change_map_year(state):
-    state.map_figure = create_map(int(state.selected_year))
+def on_change_education(state):
+    apply_filters_to_dashboard(state)
+
+
+def on_change_year_students(state):
+    try:
+        year_value = int(state.selected_year_students)
+        filtered_data = df_melted[df_melted['År'] == year_value]
+        
+        if len(filtered_data) == 0:
+            fig = go.Figure()
+            fig.update_layout(
+                title=f'Inga data för år {year_value}',
+                height=600
+            )
+            state.bub_animated_figure = fig
+            state.categories = []
+            return
+        
+        sorted_data = filtered_data.sort_values('Antal', ascending=True)
+
+       
+
+
+        fig = px.bar(
+            sorted_data,
+            x='Antal',
+            y=category_column,
+            orientation='h',
+            color='Antal',
+            color_continuous_scale='Viridis',
+            title="",
+            labels={'Antal': 'Antal studerande', category_column: 'Utbildningsområde'},
+            text=category_column  
+        )
+        
+        fig.update_layout(
+            showlegend=False,
+            margin=dict(r=20, l=20, t=20, b=20),
+            height=600,
+            yaxis=dict(
+                title=None,
+                showticklabels=False 
+            ),
+            xaxis=dict(title='Antal studerande')
+        )
+        
+        fig.update_traces(
+            textposition='inside',
+            textfont_size=10,
+            textfont_color='white'
+        )
+        
+        state.bub_animated_figure = fig
+        state.categories = filtered_data[category_column].unique().tolist()
+        
+    except Exception as e:
+        print(f"Error in on_change_year_students: {e}")
+        fig = go.Figure()
+        fig.update_layout(title=f"Error: {str(e)}")
+        state.bub_animated_figure = fig
+        state.categories = []
+
+def on_change_year_medel(state):
+    try:
+        year_value = int(state.selected_year_medel)
+        filtered_data = df_melted_medel[df_melted_medel['År'] == year_value]
+        
+        if len(filtered_data) == 0:
+            fig = go.Figure()
+            fig.update_layout(
+                title=f'Inga data för år {year_value}',
+                height=600
+            )
+            state.medel_animated_figure = fig
+            state.categories_medel = []  
+            return
+        
+       
+        
+        sorted_data = filtered_data.sort_values('Antal', ascending=True)
+        
+        fig = px.bar(
+            sorted_data,
+            x='Antal',
+            y=category_column_medel,
+            orientation='h',
+            color='Antal',
+            color_continuous_scale='Plasma',
+            title="",
+            labels={'Antal': 'Antal (medel)', category_column_medel: 'Utbildningsområde'},
+            text=category_column_medel 
+        )
+        
+        fig.update_layout(
+            showlegend=False,
+            margin=dict(r=20, l=20, t=20, b=20),
+            height=600,
+            yaxis=dict(
+                title=None,
+                showticklabels=False  
+            ),
+            xaxis=dict(title=None)
+        )
+        
+        fig.update_traces(
+            textposition='inside',
+            textfont_size=10,
+            textfont_color='white'
+        )
+
+        state.medel_animated_figure = fig
+        state.categories_medel = filtered_data[category_column_medel].unique().tolist()
+        
+    except Exception as e:
+        print(f"Error in on_change_year_medel: {e}")
+        fig = go.Figure()
+        fig.update_layout(title=f"Error: {str(e)}")
+        state.medel_animated_figure = fig
+        state.categories_medel = []
+
 
 # inicial default kpi values 
 initial_kpi_results = kpi(filtered_df)
@@ -184,12 +280,60 @@ unique_schools = initial_kpi_results['unique_schools']
 approval_rate = initial_kpi_results['approval_rate']
 
 medel_figure = create_initial_chart_medel()
-medel_animated_figure = create_initial_chart_medel()
+
+
+medel_animated_figure = px.bar(
+    initial_filtered_data_medel.sort_values('Antal', ascending=True),
+    x='Antal',
+    y=category_column_medel,
+    orientation='h',
+    color='Antal',
+    color_continuous_scale='Plasma',
+    title="",
+    labels={'Antal': 'Antal (medel)', category_column_medel: 'Utbildningsområde'},
+    text=category_column_medel
+).update_layout(
+    showlegend=False,
+    margin=dict(r=20, l=20, t=20, b=20),
+    height=600,
+    yaxis=dict(title=None, showticklabels=False),
+    xaxis=dict(title='Antal (medel)')
+).update_traces(
+    textposition='inside',
+    textfont_size=10,
+    textfont_color='white'
+)
 
 pie_data, pie_title = prepare_pie_data_filtered(filtered_df)
 pie_figure = create_pie_chart_with_title(pie_data, pie_title)
 
-bub_animated_figure = create_initial_chart()
+sorted_initial_data = initial_filtered_data.sort_values('Antal', ascending=True)
+
+bub_animated_figure = px.bar(
+    sorted_initial_data,
+    x='Antal',
+    y=category_column,
+    orientation='h',
+    color='Antal',
+    color_continuous_scale='Viridis',
+    title="",
+    labels={'Antal': 'Antal studerande', category_column: 'Utbildningsområde'},
+    text=category_column 
+)
+
+bub_animated_figure.update_layout(
+    showlegend=False,
+    margin=dict(r=20, l=20, t=20, b=20),
+    height=600,
+    yaxis=dict(title=None, showticklabels=False),
+    xaxis=dict(title='Antal studerande')
+)
+
+bub_animated_figure.update_traces(
+    textposition='inside',
+    textfont_size=10,
+    textfont_color='white'
+)
 
 #------------------------------------
 # Sweden map
@@ -198,9 +342,11 @@ df_combine, df_regions, json_data, region_codes = map_processing()
 select_year = 2024
 
 def update_sweden_map(state):
-    state.map_figure = create_map(state.select_year)
+    state.map_figure = create_map(state.selected_year_map)
 
-map_figure = create_map(select_year)
+map_figure = create_map(selected_year_map)
+
+
 #------------------------------------
 
 with tgb.Page() as page:
@@ -215,14 +361,14 @@ with tgb.Page() as page:
                 with tgb.part(class_name="filter-section"):
                     with tgb.part(class_name="filter-grid"):
                         with tgb.part(class_name="card"):
-                            tgb.text("# Filter")
+                            tgb.text("# Filter", mode="md")
 
                             tgb.selector(
                                 value="{selected_educational_area}",
                                 lov="{educational_areas}",
                                 label="Välj utbildningsområde",
                                 dropdown=True,
-                             #   on_change=on_change_educational_area
+                              #  on_change=on_change_educational_area
                             )
 
                             tgb.selector(
@@ -230,7 +376,7 @@ with tgb.Page() as page:
                                 lov="{municipalities}",
                                 label="Välj kommun",
                                 dropdown=True,
-                                #on_change=on_change_municipality
+                             #   on_change=on_change_municipality
                             )
 
                             tgb.selector(
@@ -249,9 +395,9 @@ with tgb.Page() as page:
                             )
 
                             tgb.selector(
-                                value="{selected_year}",
-                                lov="{years}",
-                                on_change=on_change_year,  
+                                value="{selected_year_kpi_pie}",
+                                lov="{years_kpi_pie}",
+                               # on_change=on_change_year_kpi_pie,  
                                 dropdown=True,
                                 width="100%",
                                 label="Välj år:"
@@ -261,7 +407,8 @@ with tgb.Page() as page:
                             tgb.button(
                                 "Filtrera",
                                 class_name="button-primary",
-                                on_action=apply_filters_to_dashboard,
+                                on_action=on_change_year_kpi_pie,
+                              #  on_action=apply_filters_to_dashboard,
                             )
 
                             tgb.button(
@@ -299,9 +446,9 @@ with tgb.Page() as page:
                             tgb.text("### Geografisk fördelning (2022-2024)", mode="md")
                             with tgb.part(style="width: 100%; height: 500px;"): 
                                 tgb.selector(
-                                    value="{selected_year}",
-                                    lov="{years}",
-                                    on_change=on_change_map_year,  
+                                    value="{selected_year_map}",
+                                    lov="{years_map}",
+                                    on_change=update_sweden_map,  
                                     dropdown=True,
                                     width="100%",
                                     label="Välj år:"
@@ -317,55 +464,31 @@ with tgb.Page() as page:
                     with tgb.part(class_name="bubble-chart-container"):
                         with tgb.part(class_name="chart-area"):
                             with tgb.part(style="width: 100%; height: 600px;"): 
+                                tgb.selector(
+                                    value="{selected_year_students}",
+                                    lov="{years}",
+                                    on_change=on_change_year_students,
+                                    dropdown=True,
+                                    width="100%",
+                                    label="Välj år"
+                                )
                                 tgb.chart(figure="{bub_animated_figure}")
                         
-                        with tgb.part(class_name="controls-area"):
-                           # tgb.text("#### År: {selected_year}", mode="md")
-                            
-                            with tgb.part(class_name="selector-container"):
-                                tgb.text("Välj år:", style="font-weight: bold; margin-bottom: 5px;")
-                                tgb.selector(
-                                    value="{selected_year}",
-                                    lov="{years}",
-                                    on_change=filter_by_year,
-                                    dropdown=True,
-                                    width="100%"
-                                )
-                            
-                            tgb.text("#### Utbildningsområde", mode="md")
-                            with tgb.part(class_name="legend-list"):
-                                emojis = ["🔵", "🔴", "🟢", "🟣", "🟠", "🔷", "🟥", "🟩", "🟪", "🟨"]
-                                for i, cat in enumerate(categories):
-                                    emoji = emojis[i % len(emojis)]
-                                    tgb.text(f"{emoji} {cat}")
-
-                     
-                    tgb.text("### Medel", mode="md")
+             
+                    tgb.text("### Utbetalda statliga medel (miljoner kronor)", mode="md")
                     
                     with tgb.part(class_name="medel-chart-container"):
                         with tgb.part(class_name="chart-area"):
                             with tgb.part(style="width: 100%; height: 600px;"): 
+                                tgb.selector(
+                                    value="{selected_year_medel}",
+                                    lov="{years}",
+                                    on_change=on_change_year_medel,
+                                    dropdown=True,
+                                    width="100%", 
+                                    label="Välj år"
+                                ),
                                 tgb.chart(figure="{medel_animated_figure}")
                         
-                        with tgb.part(class_name="controls-area"):
-                          #  tgb.text("#### År: {selected_year}", mode="md")
-                            
-                            with tgb.part(class_name="selector-container"):
-                                tgb.text("Välj år:", style="font-weight: bold; margin-bottom: 5px;")
-                                tgb.selector(
-                                    value="{selected_year}",
-                                    lov="{years}",
-                                    on_change=filter_by_year_medel,
-                                    dropdown=True,
-                                    width="100%"
-                                )
-                            
-                            tgb.text("#### Utbildningsområde", mode="md")
-                            with tgb.part(class_name="legend-list"):
-                              
-                                emojis = ["🔵", "🔴", "🟢", "🟣", "🟠", "🔷", "🟥", "🟩", "🟪", "🟨"]
-                                for i, cat in enumerate(categories_medel):
-                                    emoji = emojis[i % len(emojis)]
-                                    tgb.text(f"{emoji} {cat}")
-
+                
 dashboard_page = page

@@ -41,22 +41,6 @@ def prepare_pie_data_filtered(filtered_df):
         return school_stats, title
     
 
-def on_change_year(state):
-    filtered_result = apply_filters(
-        filtered_df, 
-        state.selected_educational_area,
-        state.selected_municipality,
-        state.selected_school,
-        state.selected_education
-    )
-    
-    filtered_df_local = filtered_result[0]
-    
-    # update pie
-    pie_data, pie_title = prepare_pie_data_filtered(filtered_df_local)
-    state.pie_figure = create_pie_chart_with_title(pie_data, pie_title)
-    
-
 
 def create_pie_chart_with_title(data_series, title):
     if len(data_series) == 0:
@@ -183,65 +167,17 @@ def create_bar(df_bar_chart):
 
 bar_chart = create_bar(df_story1)
 
-# bubbles chart---------------------------------------------------------
+# bubble charts---------------------------------------------------------
 
 
 unique_years = sorted(df_melted['År'].unique())
 years = [str(year) for year in unique_years]
 selected_year = years[0]
 
-def filter_by_year(state):
-    try:
-        year_value = int(state.selected_year)
-        filtered_data = df_melted[df_melted['År'] == year_value]
-        
-        if len(filtered_data) == 0:
-            fig = go.Figure()
-            fig.update_layout(
-                title=f'Inga data för år {year_value}',
-                height=600
-            )
-            state.bub_animated_figure = fig
-            state.categories = []
-            return
-        
-        fig = px.scatter(
-            filtered_data,
-            x=category_column,            
-            y='Antal',                       
-            size='Antal',                   
-            color=category_column,          
-            hover_name=category_column,      
-            size_max=50,                    
-            title="",
-            labels={'År': 'År', 'Antal': 'Antal', category_column: 'Utbildningsområde'},
-            template="plotly_white"          
-        )
+unique_years_medel = sorted(df_melted_medel['År'].unique())
+years_medel = [str(year) for year in unique_years_medel]
+selected_year_medel = years_medel[0]
 
-        fig.update_layout(
-            xaxis=dict(
-                showticklabels=False,
-                title=None
-            ),
-            yaxis=dict(
-                title='Antal'
-            ),
-
-            showlegend=False,
-            margin=dict(r=20, l=20, t=20, b=20),
-            height=600
-        )
-        
-        state.bub_animated_figure = fig
-        
-        state.categories = filtered_data[category_column].unique().tolist()
-        
-    except Exception as e:
-        print(f"Error in filter_by_year: {e}")
-        fig = go.Figure()
-        fig.update_layout(title=f"Error: {str(e)}")
-        state.bub_animated_figure = fig
-        state.categories = []
 
 
 def create_initial_chart():
@@ -278,64 +214,6 @@ def create_initial_chart():
     return fig
 
 #  medel chart--------------------------------------------------------------
-
-
-unique_years_medel = sorted(df_melted_medel['År'].unique())
-years_medel = [str(year) for year in unique_years_medel]
-selected_year_medel = years_medel[0]
-
-def filter_by_year_medel(state):
-    try:
-        year_value = int(state.selected_year)
-        filtered_data = df_melted_medel[df_melted_medel['År'] == year_value]
-        
-        if len(filtered_data) == 0:
-            fig = go.Figure()
-            fig.update_layout(
-                title=f'Inga data för år {year_value}',
-                height=600
-            )
-            state.medel_animated_figure = fig
-            state.categories_medel = []  
-            return
-        
-        fig = px.scatter(
-            filtered_data,
-            x=category_column_medel,  
-            y='Antal',                       
-            size='Antal',                   
-            color=category_column_medel,  
-            hover_name=category_column_medel,  
-            size_max=50,                    
-            title="",
-            labels={'År': 'År', 'Antal': 'Antal', category_column_medel: 'Utbildningsområde'},
-            template="plotly_white"          
-        )
-
-        fig.update_layout(
-            xaxis=dict(
-                showticklabels=False,
-                title=None
-            ),
-            yaxis=dict(
-                title='Antal'
-            ),
-
-            showlegend=False,
-            margin=dict(r=20, l=20, t=20, b=20),
-            height=600
-        )
-        
-        state.medel_animated_figure = fig
-        
-        state.categories_medel = filtered_data[category_column_medel].unique().tolist()
-        
-    except Exception as e:
-        print(f"Error in filter_by_year_medel: {e}")
-        fig = go.Figure()
-        fig.update_layout(title=f"Error: {str(e)}")
-        state.medel_animated_figure = fig
-        state.categories_medel = []
 
 
 def create_initial_chart_medel():  
@@ -377,6 +255,7 @@ def create_initial_chart_medel():
 df_combine, df_regions, json_data, region_codes = map_processing()
 
 def create_map(selected_year):
+    selected_year= int(selected_year)
     df_year = df_regions[df_regions["År"] == selected_year].reset_index(drop=True)
     df_combine_statistic = df_combine[df_combine["År"] == selected_year]
 
@@ -408,10 +287,11 @@ def create_map(selected_year):
     )
 
     fig.update_layout(
-        mapbox=dict(style="carto-darkmatter", zoom=3.3, center=dict(lat=62.6952, lon=13.9149)),
-        width=470,
-        height=500,
+        mapbox=dict(style="carto-darkmatter", zoom=3.8, center=dict(lat=62.6952, lon=13.9149)),
+        width=600,
+        height=650,
         margin=dict(r=0, t=50, l=0, b=0),
+
         title=dict(
             text=f"""
                 <b>Antalet beviljade</b>
