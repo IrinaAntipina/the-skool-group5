@@ -4,8 +4,9 @@ from .charts import create_bar
 
 
 bar_chart = create_bar(df_bar_chart)
-image1 = "../assets//storytelling_pictures/statliga_medel.png"
+image1 = "../assets/storytelling_pictures/output image.png"
 image2 = "../assets//storytelling_pictures/studerande_2014_2024.png"
+
 
 # with tgb.Page() as page:
 #     with tgb.part(class_name="container-card"):
