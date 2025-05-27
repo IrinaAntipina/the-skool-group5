@@ -287,10 +287,11 @@ def create_map(selected_year):
     )
 
     fig.update_layout(
-        mapbox=dict(style="carto-darkmatter", zoom=3.3, center=dict(lat=62.6952, lon=13.9149)),
-        width=470,
-        height=500,
+        mapbox=dict(style="carto-darkmatter", zoom=3.8, center=dict(lat=62.6952, lon=13.9149)),
+        width=600,
+        height=650,
         margin=dict(r=0, t=50, l=0, b=0),
+
         title=dict(
             text=f"""
                 <b>Antalet beviljade</b>
