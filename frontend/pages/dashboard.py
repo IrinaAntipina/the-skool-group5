@@ -33,14 +33,11 @@ from .charts import (
 
 map_figure = None
 
-#selected_year_kpi_pie = selected_year
 selected_year_kpi_pie = "2024"
 selected_year_map = selected_year
 years_map = ["2022", "2023", "2024"]  
 years_kpi_pie = ["2023", "2024"] 
 selected_year_map = "2024"  
-# selected_year_students = selected_year 
-# selected_year_medel = selected_year_medel 
 selected_year_students = "2024"
 selected_year_medel = "2024"
 
@@ -109,6 +106,7 @@ def update_filter_lists(state):
 
 def on_change_year_kpi_pie(state):
     apply_filters_to_dashboard(state)
+    update_filter_lists(state) 
 
 
 def reset_filters(state):
@@ -126,7 +124,6 @@ def reset_filters(state):
     kpi_results = kpi(filtered_df)
     
     
-
 def on_change_educational_area(state):
     state.selected_municipality = ""
     state.selected_school = ""
@@ -210,9 +207,6 @@ def on_change_year_students(state):
         )
         
         fig.update_traces(
-            # textposition='inside',
-            # textfont_size=10,
-            # textfont_color='white'
             textposition=None,
             textfont_size=None,
             textfont_color=None,
@@ -253,7 +247,7 @@ def on_change_year_medel(state):
             y=category_column_medel,
             orientation='h',
             color='Antal',
-            color_continuous_scale=[[0, 'rgb(25,25,75)'], [1, 'rgb(50,50,150)']],
+            color_continuous_scale=[[0, 'rgb(120,0,0)'], [1, 'rgb(200,20,20)']],
             title="",
             labels={'Antal': 'Antal (medel)', category_column_medel: 'Utbildningsområde'},
             text=None
@@ -290,9 +284,6 @@ def on_change_year_medel(state):
         )
         
         fig.update_traces(
-            # textposition='inside',
-            # textfont_size=10,
-            # textfont_color='white'
             textposition=None,
             textfont_size=None,
             textfont_color=None,
@@ -322,36 +313,13 @@ approval_rate = initial_kpi_results['approval_rate']
 medel_figure = create_initial_chart_medel()
 
 
-# medel_animated_figure = px.bar(
-#     initial_filtered_data_medel.sort_values('Antal', ascending=True),
-#     x='Antal',
-#     y=category_column_medel,
-#     orientation='h',
-#     color='Antal',
-#     color_continuous_scale='Plasma',
-#     title="",
-#     labels={'Antal': 'Antal (medel)', category_column_medel: 'Utbildningsområde'},
-#     text=category_column_medel
-# ).update_layout(
-#     showlegend=False,
-#     margin=dict(r=20, l=20, t=20, b=20),
-#     height=600,
-#     yaxis=dict(title=None, showticklabels=False),
-#     xaxis=dict(title='Antal (medel)')
-# ).update_traces(
-#     textposition='inside',
-#     textfont_size=10,
-#     textfont_color='white'
-# )
-
-
 medel_animated_figure = px.bar(
     initial_filtered_data_medel.sort_values('Antal', ascending=True),
     x='Antal',
     y=category_column_medel,
     orientation='h',
     color='Antal',
-    color_continuous_scale=[[0, 'rgb(25,25,75)'], [1, 'rgb(50,50,150)']],
+    color_continuous_scale=[[0, 'rgb(120,0,0)'], [1, 'rgb(200,20,20)']],
     title="",
     labels={'Antal': 'Antal (medel)', category_column_medel: 'Utbildningsområde'},
     text=None  
@@ -483,7 +451,7 @@ with tgb.Page() as page:
                                 lov="{educational_areas}",
                                 label="Välj utbildningsområde",
                                 dropdown=True,
-                              #  on_change=on_change_educational_area
+                               # on_change=on_change_educational_area
                             )
 
                             tgb.selector(
@@ -544,8 +512,7 @@ with tgb.Page() as page:
                             tgb.text(f"**Antal anordnare:** {{unique_schools}}", mode="md", class_name="kpi-value")
                             
                             tgb.text("*Värdena uppdateras baserat på valda filter*", mode="md", class_name="filter-note")
-
-
+                
        
             with tgb.part(class_name="middle-column"):
                 with tgb.part(class_name="middle-section"):
@@ -555,6 +522,7 @@ with tgb.Page() as page:
                             tgb.text("### Fördelning av beviljade platser", mode="md")
                             with tgb.part(style="width: 100%; height: 500px;"): 
                                 tgb.chart(figure="{pie_figure}")
+                            tgb.text("*Om diagrammet visar 'Inga data', prova att välja annat år eller färre filter*", mode="md", class_name="filter-note")
                         
   
                         with tgb.part(class_name="map-card"):
