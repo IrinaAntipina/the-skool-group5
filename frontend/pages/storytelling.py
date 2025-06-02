@@ -1,9 +1,10 @@
 import taipy.gui.builder as tgb
 from backend.data_processing import df_bar_chart
-from .charts import create_bar
+# from .charts import create_bar
 
 
-bar_chart = create_bar(df_bar_chart)
+# bar_chart = create_bar(df_bar_chart)
+image = "../assets/storytelling_pictures/top_10_courses.png"
 image1 = "../assets/storytelling_pictures/output image.png"
 image2 = "../assets//storytelling_pictures/studerande_2014_2024.png"
 image3 = "../assets/storytelling_pictures/popular_areas_2025.png"
@@ -15,8 +16,8 @@ with tgb.Page() as page:
             tgb.text("# Storytelling", mode="md")
     
         with tgb.part(style="margin-bottom: 40px;"):
-                tgb.chart(figure="{bar_chart}", width="80%")
-            
+                # tgb.chart(figure="{bar_chart}", width="80%")
+                tgb.image("{image}", width="80%")
         with tgb.part(style="margin-bottom: 40px;"):
                 tgb.image("{image1}", width="80%")
             
